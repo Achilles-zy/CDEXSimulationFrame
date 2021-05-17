@@ -1,0 +1,13 @@
+/gps/particle e-
+/gps/pos/type Point
+/gps/ang/type iso
+
+/gps/energy 20 keV
+/gps/position 18 18 -4 mm
+/run/beamOn 100
+/gps/energy 20 keV
+/gps/position 18 18 0 mm
+/run/beamOn 100
+/gps/energy 20 keV
+/gps/position 18 18 4 mm
+/run/beamOn 100

@@ -1,0 +1,10 @@
+/gps/particle gamma
+
+/gps/energy 2.6 MeV
+/run/beamOn 1
+
+#/vis/modeling/trajectories/create/drawByParticleID
+#/vis/modeling/trajectories/drawByParticleID-0/default/setDrawStepPts true
+# To select or override default colours (note: e+ is blue by default):
+#/vis/modeling/trajectories/list
+#/vis/modeling/trajectories/drawByParticleID-0/set gamma yellow

@@ -1,0 +1,21 @@
+#Radioactive decay simulation
+/control/verbose 0
+/control/saveHistory
+/run/verbose 0
+#
+# Change the default number of threads (in multi-threaded mode)
+/run/numberOfThreads 2
+
+/CDEX/sim/set/mode CDEXFiberBucket
+/CDEX/src/type Wire
+
+# Initialize kernel
+/run/initialize
+
+#Ac228
+/gps/particle ion
+/gps/ion 89 228 0 0
+/gps/energy 0 keV
+/run/beamOn 100
+
+

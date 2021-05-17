@@ -1,0 +1,7 @@
+/mnt/d/Study/CDEXSimulationFrame/build/CMakeFiles/install/strip.dir
+/mnt/d/Study/CDEXSimulationFrame/build/CMakeFiles/install/local.dir
+/mnt/d/Study/CDEXSimulationFrame/build/CMakeFiles/install.dir
+/mnt/d/Study/CDEXSimulationFrame/build/CMakeFiles/list_install_components.dir
+/mnt/d/Study/CDEXSimulationFrame/build/CMakeFiles/rebuild_cache.dir
+/mnt/d/Study/CDEXSimulationFrame/build/CMakeFiles/edit_cache.dir
+/mnt/d/Study/CDEXSimulationFrame/build/CMakeFiles/CDEXSimulationFrame.dir

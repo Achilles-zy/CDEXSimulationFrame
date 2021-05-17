@@ -1,0 +1,62 @@
+#Radioactive decay simulation
+/control/verbose 0
+/control/saveHistory
+/run/verbose 0
+/tracking/verbose 0
+#
+# Change the default number of threads (in multi-threaded mode)
+/run/numberOfThreads 60
+#
+
+/CDEX/sim/set/mode CDEX300
+/CDEX/src/type CuShield
+/CDEX/cons/set/cushieldthickness 2.5 cm
+
+# Initialize kernel
+/run/initialize
+
+/gps/particle ion
+/gps/ion 83 214 0 0
+/gps/energy 0 keV
+/run/beamOn 10000000
+
+/gps/particle ion
+/gps/ion 81 208 0 0
+/gps/energy 0 keV
+/run/beamOn 10000000
+
+/CDEX/cons/set/cushieldthickness 5 cm
+
+/gps/particle ion
+/gps/ion 83 214 0 0
+/gps/energy 0 keV
+/run/beamOn 10000000
+
+/gps/particle ion
+/gps/ion 81 208 0 0
+/gps/energy 0 keV
+/run/beamOn 10000000
+
+/CDEX/cons/set/cushieldthickness 7.5 cm
+
+/gps/particle ion
+/gps/ion 83 214 0 0
+/gps/energy 0 keV
+/run/beamOn 10000000
+
+/gps/particle ion
+/gps/ion 81 208 0 0
+/gps/energy 0 keV
+/run/beamOn 10000000
+
+/CDEX/cons/set/cushieldthickness 10 cm
+
+/gps/particle ion
+/gps/ion 83 214 0 0
+/gps/energy 0 keV
+/run/beamOn 10000000
+
+/gps/particle ion
+/gps/ion 81 208 0 0
+/gps/energy 0 keV
+/run/beamOn 10000000
