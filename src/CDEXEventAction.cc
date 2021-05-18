@@ -100,14 +100,14 @@ void CDEXEventAction::EndOfEventAction(const G4Event *evt)
 		{
 			for (G4int i = 0; i < EdepInfoInScintillator.size(); i++)
 			{
-				analysisManager->FillNtupleIColumn(1, 0, EdepInfoInScintillator[i][0]);
-				analysisManager->FillNtupleIColumn(1, 1, EdepInfoInScintillator[i][1]);
-				analysisManager->FillNtupleDColumn(1, 2, EdepInfoInScintillator[i][2]);
-				analysisManager->FillNtupleDColumn(1, 3, EdepInfoInScintillator[i][3]);
-				analysisManager->FillNtupleDColumn(1, 4, EdepInfoInScintillator[i][4]);
-				analysisManager->FillNtupleDColumn(1, 5, EdepInfoInScintillator[i][5]);
-				analysisManager->FillNtupleIColumn(1, 6, EventID);
-				analysisManager->AddNtupleRow(1);
+				// analysisManager->FillNtupleIColumn(1, 0, EdepInfoInScintillator[i][0]);
+				// analysisManager->FillNtupleIColumn(1, 1, EdepInfoInScintillator[i][1]);
+				// analysisManager->FillNtupleDColumn(1, 2, EdepInfoInScintillator[i][2]);
+				// analysisManager->FillNtupleDColumn(1, 3, EdepInfoInScintillator[i][3]);
+				// analysisManager->FillNtupleDColumn(1, 4, EdepInfoInScintillator[i][4]);
+				// analysisManager->FillNtupleDColumn(1, 5, EdepInfoInScintillator[i][5]);
+				// analysisManager->FillNtupleIColumn(1, 6, EventID);
+				// analysisManager->AddNtupleRow(1);
 
 				if (edepBulk > 160 * eV)
 				{

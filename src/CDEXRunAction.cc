@@ -58,7 +58,7 @@ CDEXRunAction::CDEXRunAction(CDEXPrimaryGeneratorAction *gen, CDEXDetectorConstr
 		analysisManager->CreateNtupleIColumn(1, "EventID");
 		analysisManager->FinishNtuple(1);
 
-		analysisManager->CreateNtuple("EdepArgonVeto", "Veto Edep in Argon");//Bulk events that deposit energy in Ar
+		analysisManager->CreateNtuple("EdepArgonVeto", "Veto Edep in Argon"); //Bulk events that deposit energy in Ar
 		analysisManager->CreateNtupleIColumn(2, "ParticleType");
 		analysisManager->CreateNtupleIColumn(2, "CreatorProcess");
 		analysisManager->CreateNtupleDColumn(2, "PosX");
@@ -83,21 +83,15 @@ CDEXRunAction::~CDEXRunAction()
 void CDEXRunAction::BeginOfRunAction(const G4Run *aRun)
 {
 	auto analysisManager = G4AnalysisManager::Instance();
+	auto accumulableManager = G4AccumulableManager::Instance();
 	G4int RunID = aRun->GetRunID();
 
 	if (fDetCons->GetMode() == "CDEX300")
 	{
-		filename = "CDEX300_" + fPrimaryGenerator->GetSrcType();
-		txtname = "CDEX300_" + fPrimaryGenerator->GetSrcType();
-		if (fPrimaryGenerator->GetSrcType() == "CuShield")
-		{
-			G4int thickness = std::floor(fDetCons->GetCuShieldThickness() / (1 * cm));
-			filename = "CDEX300_" + fPrimaryGenerator->GetSrcType() + "_" + std::to_string(thickness) + "cm";
-			txtname = "CDEX300_" + fPrimaryGenerator->GetSrcType() + "_" + std::to_string(thickness) + "cm";
-		}
+		G4int thickness = std::floor(fDetCons->GetCuShieldThickness() / (1 * cm));
+		filename = "CDEX300_" + fPrimaryGenerator->GetSrcType() + "_" + std::to_string(thickness) + "cm";
+		txtname = "CDEX300_" + fPrimaryGenerator->GetSrcType() + "_" + std::to_string(thickness) + "cm";
 		analysisManager->OpenFile(filename);
-
-		G4AccumulableManager *accumulableManager = G4AccumulableManager::Instance();
 		accumulableManager->Reset();
 	}
 
@@ -111,12 +105,11 @@ void CDEXRunAction::BeginOfRunAction(const G4Run *aRun)
 
 void CDEXRunAction::EndOfRunAction(const G4Run *aRun)
 {
+	auto analysisManager = G4AnalysisManager::Instance();
+	auto accumulableManager = G4AccumulableManager::Instance();
 	if (fDetCons->GetMode() == "CDEX300")
 	{
-		G4AccumulableManager *accumulableManager = G4AccumulableManager::Instance();
 		accumulableManager->Merge();
-
-		auto analysisManager = G4AnalysisManager::Instance();
 		if (G4RunManager::GetRunManager()->GetRunManagerType() != 1)
 		{
 			analysisManager->FillNtupleIColumn(0, 0, BulkEventCount.GetValue());
@@ -159,7 +152,7 @@ void CDEXRunAction::CDEX300Output(const G4Run *aRun)
 		G4cout << "Run" << aRun->GetRunID() << " Finished" << G4endl;
 		G4cout << "TotalEvent =" << aRun->GetNumberOfEvent() << G4endl;
 		G4cout << "BulkEventCount =" << BulkEventCount.GetValue() << G4endl;
-		G4cout << "ROIEventCount =" << ROIEventCount.GetValue() << G4endl;
+		G4cout << "ROIEventCount =" << fDetCons->GetCuShieldThickness() << G4endl;
 		G4cout << G4endl;
 		G4cout << G4endl;
 		G4cout << "===============================================================" << G4endl;
@@ -170,8 +163,9 @@ void CDEXRunAction::CDEX300Output(const G4Run *aRun)
 			output.open(txtname + ".txt", std::ios::ate);
 			//output.open("FiberTest_Point.txt", std::ios::app);
 			output
-				<< "Simulation Result:" << G4endl
-				<< "Source Type:" << fPrimaryGenerator->GetSrcType() << G4endl;
+				<< "Simulation Result" << G4endl
+				<< "Source Type: " << fPrimaryGenerator->GetSrcType() << G4endl
+				<< "Cu Shield Thickness: " << fDetCons->GetCuShieldThickness() / (1 * cm) << " cm" << G4endl;
 		}
 		else
 		{
@@ -196,7 +190,7 @@ void CDEXRunAction::CDEX300Output(const G4Run *aRun)
 				<< std::setw(10) << std::left << aRun->GetRunID() << '\t'
 				<< std::setw(40) << std::left << aRun->GetNumberOfEvent() << '\t'
 				<< std::setw(40) << std::left << fPrimaryGenerator->GetPrimaryName() << '\t'
-				<< std::setw(40) << std::left << std::setiosflags(std::ios::fixed) << std::setprecision(2) << fPrimaryGenerator->GetPrimaryE() / (1 * eV)
+				<< std::setw(40) << std::left << std::setiosflags(std::ios::fixed) << std::setprecision(2) << fPrimaryGenerator->GetPrimaryE() / (1 * eV)<< '\t'
 				<< std::setw(40) << std::left << BulkEventCount.GetValue() << '\t'
 				<< std::setw(40) << std::left << ROIEventCount.GetValue() << G4endl;
 			output.close();
@@ -217,7 +211,7 @@ void CDEXRunAction::CDEX300Output(const G4Run *aRun)
 				<< std::setw(10) << std::left << aRun->GetRunID() << '\t'
 				<< std::setw(40) << std::left << aRun->GetNumberOfEvent() << '\t'
 				<< std::setw(40) << std::left << fPrimaryGenerator->GetPrimaryName() << '\t'
-				<< std::setw(40) << std::left << std::setiosflags(std::ios::fixed) << std::setprecision(2) << fPrimaryGenerator->GetPrimaryE() / (1 * eV)
+				<< std::setw(40) << std::left << std::setiosflags(std::ios::fixed) << std::setprecision(2) << fPrimaryGenerator->GetPrimaryE() / (1 * eV)<< '\t'
 				<< std::setw(40) << std::left << BulkEventCount.GetValue() << '\t'
 				<< std::setw(40) << std::left << ROIEventCount.GetValue() << G4endl;
 			output.close();
