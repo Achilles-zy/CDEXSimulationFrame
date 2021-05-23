@@ -466,10 +466,10 @@ CDEXPhysicsList::CDEXPhysicsList() : G4VModularPhysicsList()
     // biasingPhysics->NonPhysicsBias("neutron");
     // biasingPhysics->Bias("alpha");
     RegisterPhysics(biasingPhysics);
-    SetCutValue(1 * micrometer, "alpha");
-    SetCutValue(1 * micrometer, "gamma");
-    SetCutValue(0.1 * micrometer, "e-");
-    SetCutValue(1 * micrometer, "e+");
+    SetCutValue(100 * micrometer, "alpha");
+    SetCutValue(100 * micrometer, "gamma");
+    SetCutValue(100 * micrometer, "e-");
+    SetCutValue(100 * micrometer, "e+");
     std::cout << "INFO: Construct the Physical List register !" << std::endl;
 }
 

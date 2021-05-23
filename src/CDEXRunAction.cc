@@ -67,6 +67,10 @@ CDEXRunAction::CDEXRunAction(CDEXPrimaryGeneratorAction *gen, CDEXDetectorConstr
 		analysisManager->CreateNtupleDColumn(2, "Edep");
 		analysisManager->CreateNtupleIColumn(2, "EventID");
 		analysisManager->FinishNtuple(2);
+
+		analysisManager->CreateNtuple("Edep", "Edep in Bulk"); //Bulk events that deposit energy in Ar
+		analysisManager->CreateNtupleDColumn(3, "Edep");
+		analysisManager->FinishNtuple(3);
 	}
 }
 
@@ -152,7 +156,7 @@ void CDEXRunAction::CDEX300Output(const G4Run *aRun)
 		G4cout << "Run" << aRun->GetRunID() << " Finished" << G4endl;
 		G4cout << "TotalEvent =" << aRun->GetNumberOfEvent() << G4endl;
 		G4cout << "BulkEventCount =" << BulkEventCount.GetValue() << G4endl;
-		G4cout << "ROIEventCount =" << fDetCons->GetCuShieldThickness() << G4endl;
+		G4cout << "ROIEventCount =" << ROIEventCount.GetValue() << G4endl;
 		G4cout << G4endl;
 		G4cout << G4endl;
 		G4cout << "===============================================================" << G4endl;

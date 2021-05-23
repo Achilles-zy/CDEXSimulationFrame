@@ -205,7 +205,7 @@ void CDEXDetectorConstruction::GetPhysicalVolumeProperties()
 		VolumeLUT.insert(pair<G4VPhysicalVolume *, G4int>(pv, ipv));
 		VolumeNameLUT.insert(pair<G4VPhysicalVolume *, G4String>(pv, pv->GetName()));
 		G4String VolumeName = pv->GetName();
-		G4double VolumeMass = pv->GetLogicalVolume()->GetMass();
+		G4double VolumeMass = pv->GetLogicalVolume()->GetMass()/(1*kg);
 		G4cout << "Volume ID:" << ipv << " VolumeName:" << VolumeName << " VolumeMass" << VolumeMass << G4endl;
 		output << ipv << '\t' << VolumeName << '\t' << VolumeMass << G4endl;
 	}
@@ -1989,7 +1989,7 @@ G4LogicalVolume *CDEXDetectorConstruction::ConstructCDEX300Bucket(G4double shiel
 	auto logicVacuumLayer = new G4LogicalVolume(solidSSOuterWall, fVacuum, "logicBucketVacuumLayer");
 
 	auto solidCuShield = new G4Tubs("solidCuShield", BucketRadius - SSWallThickness * 2 - VacuumThickness - CuShieldThickness, BucketRadius - SSWallThickness * 2 - VacuumThickness, BucketHeight / 2, 0., twopi);
-	auto logicCuShield = new G4LogicalVolume(solidCuShield, matLAr, "logicCuShield");
+	auto logicCuShield = new G4LogicalVolume(solidCuShield, matCu, "logicCuShield");
 
 	auto solidBucketCrystal = new G4Tubs("solidBucketCrystal", 0, BucketRadius - 2 * SSWallThickness - VacuumThickness - CuShieldThickness, BucketHeight / 2, 0, twopi);
 	logicArCrystal_CDEX300 = new G4LogicalVolume(solidBucketCrystal, matLAr, "logicArCrystal_CDEX300");

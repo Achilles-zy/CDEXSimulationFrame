@@ -77,7 +77,8 @@ void CDEXEventAction::EndOfEventAction(const G4Event *evt)
 	if (CDEXCons->GetMode() == "CDEX300")
 	{
 		auto analysisManager = G4AnalysisManager::Instance();
-
+		analysisManager->FillNtupleDColumn(3, 0, edepBulk);
+		analysisManager->AddNtupleRow(3);
 		if (edepBulk > 160 * eV)
 		{
 			run->CountBulkEvent();

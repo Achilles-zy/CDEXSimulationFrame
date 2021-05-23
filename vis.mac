@@ -124,6 +124,12 @@
 /vis/geometry/set/colour logicBucketSSWall 0 0.5 0.5 0.5 0.5
 /vis/geometry/set/colour logicBucketVacuumLayer 0 0 0 0.5 0.5
 /vis/geometry/set/colour logicCuShield 0 0.5 0.5 0 0.5
+/vis/geometry/set/colour logicShroud 0 0 0 1 .3
+/vis/geometry/set/colour logicJacket 0 0.5 0.5 0.5 1
+/vis/geometry/set/colour logicBraid 0 1 1 0 1
+/vis/geometry/set/colour logicOuterJacket 0 0.5 0.5 0.5 1
+/vis/geometry/set/colour logicWireJacket 0 1 1 1 1
+/vis/geometry/set/colour logicASICPlate 0 0.5 1 0.5 1
 
 /vis/geometry/set/colour logicConductor 0 1 1 0 1
 /vis/geometry/set/colour logicJacket 0 0.5 0.5 0.5 1
