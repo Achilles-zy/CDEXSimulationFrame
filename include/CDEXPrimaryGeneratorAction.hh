@@ -77,6 +77,8 @@ private:
     G4double fBeamTheta;
     G4double fWavelength;
 
+    G4int ImprintID=1;
+
     G4GeneralParticleSource *fCDEXGPS;
     CDEXDetectorConstruction *fDetCons;
     CDEXPrimaryGeneratorMessenger *fPrimaryMessenger;

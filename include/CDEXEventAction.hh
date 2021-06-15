@@ -22,37 +22,48 @@ public:
 public:
   void BeginOfEventAction(const G4Event *);
   void EndOfEventAction(const G4Event *);
-  void AddBulkEnergy(G4double);
+  void AddBulkEnergy(G4double E);
+  void AddBulkEnergyDet(G4double E,G4int DetID);
   void SiPMTrue() { ifSiPM = true; }
   void DetectableTrue() { ifDetectable = true; }
   void CountTotalSiPMPhoton(G4int ph) { TotalSiPMPhotonCount = TotalSiPMPhotonCount + ph; }
   G4int GetTotalSiPMPhotonCnt() { return TotalSiPMPhotonCount; }
-
+  G4int GetEventID() { return fEventID; }
+  G4int GetSiPMSignalCnt(){return SiPMSignalCnt;}
+  void CountSiPMSignal() { SiPMSignalCnt += 1; }
   void AddToSiPM(G4int, G4int);
   void AddToSiPMSignal(G4int, G4int);
   G4int GetSiPMPhotonCount(G4int j, G4int k) { return SiPMPhotonCount[j][k]; }
   G4int GetSiPMSignalCount(G4int j, G4int k) { return SiPMSignalCount[j][k]; }
   G4double GetDistance(G4double x0, G4double y0, G4double z0, G4double x1, G4double y1, G4double z1);
-  
+
   void RecordStepInfoInScintillator(G4int particletype, G4int creatorprocess, G4double posx, G4double posy, G4double posz, G4double edep);
   void RecordEdepInfoInScintillator(G4int particletype, G4int creatorprocess, G4double posx, G4double posy, G4double posz, G4double edep);
 
+  void GetEdepStatus();
+  
 private:
-  G4double edepBulk;
+  G4double EdepBulk;
+  G4double EdepBulkDet[DETNUMBER];
   G4int SiPMPhotonCount[500][5];
   G4int SiPMSignalCount[500][5];
   G4int RowNb;
   G4int ColumnNb;
   G4int SignalSiPMCount;
   G4int MinSignalSiPMCount;
+  G4int SiPMSignalCnt;
 
   G4int Total;
   G4int DepositeID;
 
   G4int ID;
+  G4int fEventID;
   G4int TotalSiPMPhotonCount;
+  G4int DetNumber;
   G4double EnergyThreshold;
 
+  G4bool ifBulk;
+  G4bool ifROI;
   G4bool ifSiPM;
   G4bool ifFiber;
   G4bool ifDetectable;

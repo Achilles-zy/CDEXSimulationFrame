@@ -53,12 +53,12 @@ void CDEXSteppingAction::UserSteppingAction(const G4Step *aStep)
 		G4int ParentTrackID = aStep->GetTrack()->GetParentID();
 
 		const CDEXDetectorConstruction *detectorConstruction = static_cast<const CDEXDetectorConstruction *>(G4RunManager::GetRunManager()->GetUserDetectorConstruction());
-				
+
 		if (volume == detectorConstruction->GetBulk())
 		{
 			CDEXEvent->AddBulkEnergy(edep);
 		}
-		
+
 		G4int ParticleType = -1;
 		ParticleType = GetParticleIntType(ParticleName);
 		G4String CreatorProcessName = "Default";
@@ -80,7 +80,108 @@ void CDEXSteppingAction::UserSteppingAction(const G4Step *aStep)
 				CDEXEvent->RecordEdepInfoInScintillator(ParticleType, CreatorProcessType, PostStepPos.getX(), PostStepPos.getY(), PostStepPos.getZ(), DeltaE);
 			}
 		}
+	}
 
+	if (CDEXCons->GetMode() == "CDEXFiberBucketSetup")
+	{
+
+		//G4cout << "EnableAcc: " << CDEXRun->GetAccelerate() << G4endl;
+		G4String Mode = CDEXCons->GetMode();
+
+		auto analysisManager = G4AnalysisManager::Instance();
+		auto volume = aStep->GetPostStepPoint()->GetTouchableHandle()->GetVolume();
+		G4ThreeVector PostStepPos = aStep->GetPostStepPoint()->GetPosition();
+		G4ThreeVector PreStepPos = aStep->GetPreStepPoint()->GetPosition();
+		G4LogicalVolume *logicvolume = nullptr;
+		if (volume)
+		{
+			logicvolume = volume->GetLogicalVolume();
+		}
+
+		auto touchable = aStep->GetPostStepPoint()->GetTouchableHandle();
+		auto ParticleName = aStep->GetTrack()->GetParticleDefinition()->GetParticleName();
+		auto edep = aStep->GetTotalEnergyDeposit();
+		auto KineticE = aStep->GetPreStepPoint()->GetKineticEnergy();
+		
+		auto DeltaE = aStep->GetPreStepPoint()->GetKineticEnergy() - aStep->GetPostStepPoint()->GetKineticEnergy();
+		CDEXTrack->AddEdepTrack(edep);
+		G4int ParticleType = GetParticleIntType(ParticleName);
+		G4int TrackID = aStep->GetTrack()->GetTrackID();
+		G4int ParentTrackID = aStep->GetTrack()->GetParentID();
+
+		const CDEXDetectorConstruction *detectorConstruction = static_cast<const CDEXDetectorConstruction *>(G4RunManager::GetRunManager()->GetUserDetectorConstruction());
+
+		if (volume == detectorConstruction->GetBulk())
+		{
+			G4int DetID = touchable->GetCopyNumber(2);
+			CDEXEvent->AddBulkEnergy(edep);
+			CDEXEvent->AddBulkEnergyDet(edep,DetID);
+		}
+
+		if (volume && logicvolume == detectorConstruction->GetArgonVolume(Mode) && edep > 1 * eV && ParticleType != 0)
+		{
+			CDEXEvent->DetectableTrue();
+		}
+
+		//For Acceleraiton
+		#ifdef ACCTRUE
+		G4int SiPMSignalCnt=CDEXEvent->GetSiPMSignalCnt();
+		if (SiPMSignalCnt>1&&ParticleName=="opticalphoton"){
+			aStep->GetTrack()->SetTrackStatus(fStopAndKill);
+		}
+		#endif
+
+		if (ParticleName == "opticalphoton" && logicvolume != nullptr)
+		{
+			G4int SiPMType = 0;
+			G4int SiPMID;
+			G4int EvtID = CDEXEvent->GetEventID();
+			auto CurrentWL = 1240 / (KineticE / (1 * eV));
+			if (logicvolume == detectorConstruction->GetLogicFiberSiPM())
+			{
+				SiPMID = touchable->GetCopyNumber(1);
+				SiPMType = 1;
+				CDEXEvent->CountTotalSiPMPhoton(1);
+				CDEXEvent->SiPMTrue();
+				analysisManager->FillNtupleIColumn(1, 0, EvtID);
+				analysisManager->FillNtupleIColumn(1, 1, SiPMType);
+				analysisManager->FillNtupleIColumn(1, 2, SiPMID);
+				analysisManager->FillNtupleDColumn(1, 3, PostStepPos.getX());
+				analysisManager->FillNtupleDColumn(1, 4, PostStepPos.getY());
+				analysisManager->FillNtupleDColumn(1, 5, PostStepPos.getZ());
+				analysisManager->FillNtupleDColumn(1, 6, CurrentWL);
+				analysisManager->AddNtupleRow(1);
+				G4double SiPMEff = GetEfficiency(CurrentWL);
+				G4double rnd = G4UniformRand();
+				if (rnd < SiPMEff)
+				{
+					CDEXEvent->CountSiPMSignal();
+				}
+				CDEXEvent->CountTotalSiPMPhoton(1);
+			}
+			else if (logicvolume == detectorConstruction->GetLogicArVolumeSiPM())
+			{
+				SiPMID = touchable->GetCopyNumber(1);
+				SiPMType = 2;
+				CDEXEvent->CountTotalSiPMPhoton(1);
+				CDEXEvent->SiPMTrue();
+				analysisManager->FillNtupleIColumn(1, 0, EvtID);
+				analysisManager->FillNtupleIColumn(1, 1, SiPMType);
+				analysisManager->FillNtupleIColumn(1, 2, SiPMID);
+				analysisManager->FillNtupleDColumn(1, 3, PostStepPos.getX());
+				analysisManager->FillNtupleDColumn(1, 4, PostStepPos.getY());
+				analysisManager->FillNtupleDColumn(1, 5, PostStepPos.getZ());
+				analysisManager->FillNtupleDColumn(1, 6, CurrentWL);
+				analysisManager->AddNtupleRow(1);
+				G4double SiPMEff = GetEfficiency(CurrentWL);
+				G4double rnd = G4UniformRand();
+				if (rnd < SiPMEff)
+				{
+					CDEXEvent->CountSiPMSignal();
+				}
+				CDEXEvent->CountTotalSiPMPhoton(1);
+			}
+		}
 	}
 }
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

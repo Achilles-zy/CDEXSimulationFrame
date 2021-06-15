@@ -4,6 +4,7 @@
 #define CDEXSteppingAction_h 1
 
 #include "G4UserSteppingAction.hh"
+#include "CDEXRunAction.hh"
 
 #include "G4Types.hh"
 #include "G4String.hh"

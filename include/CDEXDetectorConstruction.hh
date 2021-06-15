@@ -36,6 +36,8 @@ class CDEXDetectorConstruction : public G4VUserDetectorConstruction
         const G4VPhysicalVolume* GetEnv() const;
         const G4LogicalVolume* GetLogicBEGe() const;
         const G4LogicalVolume* GetLogicBulk() const;
+        const G4LogicalVolume* GetLogicFiberSiPM() const;
+        const G4LogicalVolume* GetLogicArVolumeSiPM() const;        
         const G4LogicalVolume* GetFiber() const;
         const G4LogicalVolume* GetArgonVolume(G4String mode) const;
 
@@ -83,7 +85,7 @@ class CDEXDetectorConstruction : public G4VUserDetectorConstruction
 		G4VPhysicalVolume* ConstructBucketSiPMSystem();
 		G4LogicalVolume* ConstructSiPMBucket();
 		G4LogicalVolume* ConstructShroud();
-        G4LogicalVolume* ConstructSiPM();
+        G4LogicalVolume* ConstructSiPM();//Standard SiPM
 
         //CDEX Light Fiber Veto System Design
         G4VPhysicalVolume* ConstructBucketFiberSystem();
@@ -91,11 +93,13 @@ class CDEXDetectorConstruction : public G4VUserDetectorConstruction
         //G4LogicalVolume* ConstructFiberBucket(G4LogicalVolume**);
         G4LogicalVolume* ConstructFiberBucket();
         G4LogicalVolume* ConstructFiberSiPM();
+        G4LogicalVolume* ConstructArVolumeSiPM();
 
+        G4LogicalVolume* ConstructLightGuide(G4double length,G4Material* Envmat);
+        G4LogicalVolume* ConstructRecLightGuide(G4double length,G4Material* Envmat);  
+        
         //CDEX300
         G4LogicalVolume* ConstructCDEX300Bucket(G4double shieldthickness);
-
-
         G4LogicalVolume* ConstructShell();
 
 
@@ -235,6 +239,12 @@ class CDEXDetectorConstruction : public G4VUserDetectorConstruction
         G4VPhysicalVolume* physSiPMArray2;
         G4VPhysicalVolume* physSiPMArray3;
 
+        //SiPMs
+        G4LogicalVolume* logicFiberSiPM;
+        G4LogicalVolume* logicArVolumeSiPM;
+        G4VPhysicalVolume* physFiberSiPM;
+        G4VPhysicalVolume* physArVolumeSiPM;
+
         //G4VPhysicalVolume* physWire;
         G4VPhysicalVolume* physPENShell;
         G4VPhysicalVolume* physInnerShell;
@@ -253,15 +263,16 @@ class CDEXDetectorConstruction : public G4VUserDetectorConstruction
 
         G4LogicalVolume* logicFiber;
         //CDEX Bucket SiPM Design
-		G4LogicalVolume* logicArCrystal_SiPMBucket;
+		G4LogicalVolume* logicArVolume_SiPMBucket;
 		G4LogicalVolume* logicShourdVoid;
 
-
         //CDEX Bucket Fiber Design
-        G4LogicalVolume* logicArCrystal_FiberBucket;
+        G4LogicalVolume* logicArVolume_FiberBucket;
+
+        G4LogicalVolume* logicArVolume;
 
         //CDEX300 Design
-        G4LogicalVolume* logicArCrystal_CDEX300;
+        G4LogicalVolume* logicArVolume_CDEX300;
         G4LogicalVolume* logicCuShield;
         G4LogicalVolume* logicSSWall;
         G4double fCuShieldThickness;
@@ -356,6 +367,8 @@ class CDEXDetectorConstruction : public G4VUserDetectorConstruction
         G4double fFiberTPBThickness;
         G4double fFiberInnerCladdingThickness;
         G4double fFiberOuterCladdingThickness;
+        G4double fLightGuideInnerRadius;
+        G4double fLightGuideRadius;
         G4double fShellThickness;
         G4double fFiberPlacementRadius;
         G4ThreeVector fFiberPlacementCenter;
@@ -393,16 +406,27 @@ inline const G4LogicalVolume* CDEXDetectorConstruction::GetLogicBulk() const
     return logicBulk;
 }
 
+inline const G4LogicalVolume* CDEXDetectorConstruction::GetLogicFiberSiPM() const
+{
+    return logicFiberSiPM;
+}
+
+inline const G4LogicalVolume* CDEXDetectorConstruction::GetLogicArVolumeSiPM() const
+{
+    return logicArVolumeSiPM;
+}
+
+
 inline const G4LogicalVolume* CDEXDetectorConstruction::GetArgonVolume(G4String mode) const
 {
-    if (mode == "CDEXFiberBucket") {
-        return logicArCrystal_FiberBucket;
+    if (mode == "CDEXFiberBucketSetup") {
+        return logicArVolume_FiberBucket;
     }
-    else if (mode == "CDEXSiPMBucket") {
-        return logicArCrystal_SiPMBucket;
+    else if (mode == "CDEXSiPMBucketSetup") {
+        return logicArVolume_SiPMBucket;
     }
     else if (mode == "CDEX300") {
-        return logicArCrystal_CDEX300;
+        return logicArVolume_CDEX300;
     }
 }
 
