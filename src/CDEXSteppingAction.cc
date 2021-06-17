@@ -157,7 +157,7 @@ void CDEXSteppingAction::UserSteppingAction(const G4Step *aStep)
 				{
 					CDEXEvent->CountSiPMSignal();
 				}
-				CDEXEvent->CountTotalSiPMPhoton(1);
+				aStep->GetTrack()->SetTrackStatus(fStopAndKill);
 			}
 			else if (logicvolume == detectorConstruction->GetLogicArVolumeSiPM())
 			{
@@ -179,7 +179,7 @@ void CDEXSteppingAction::UserSteppingAction(const G4Step *aStep)
 				{
 					CDEXEvent->CountSiPMSignal();
 				}
-				CDEXEvent->CountTotalSiPMPhoton(1);
+				aStep->GetTrack()->SetTrackStatus(fStopAndKill);
 			}
 		}
 	}

@@ -81,6 +81,10 @@ class CDEXDetectorConstruction : public G4VUserDetectorConstruction
         G4AssemblyVolume* ConstructContainerSiPMArray();
         G4AssemblyVolume* ConstructSiPMArray();
 
+        //General Construction
+        G4LogicalVolume* ConstructArVolume();
+        G4LogicalVolume* ConstructArContainer();
+
 		//CDEX Bucket Veto System Design
 		G4VPhysicalVolume* ConstructBucketSiPMSystem();
 		G4LogicalVolume* ConstructSiPMBucket();
@@ -90,11 +94,11 @@ class CDEXDetectorConstruction : public G4VUserDetectorConstruction
         //CDEX Light Fiber Veto System Design
         G4VPhysicalVolume* ConstructBucketFiberSystem();
         G4LogicalVolume* ConstructLightFiber(G4double length);
-        //G4LogicalVolume* ConstructFiberBucket(G4LogicalVolume**);
         G4LogicalVolume* ConstructFiberBucket();
         G4LogicalVolume* ConstructFiberSiPM();
         G4LogicalVolume* ConstructArVolumeSiPM();
 
+        G4VPhysicalVolume* ConstructBucketLightGuideSystem();
         G4LogicalVolume* ConstructLightGuide(G4double length,G4Material* Envmat);
         G4LogicalVolume* ConstructRecLightGuide(G4double length,G4Material* Envmat);  
         
@@ -270,6 +274,7 @@ class CDEXDetectorConstruction : public G4VUserDetectorConstruction
         G4LogicalVolume* logicArVolume_FiberBucket;
 
         G4LogicalVolume* logicArVolume;
+        G4LogicalVolume* logicArContainer;
 
         //CDEX300 Design
         G4LogicalVolume* logicArVolume_CDEX300;
@@ -352,6 +357,11 @@ class CDEXDetectorConstruction : public G4VUserDetectorConstruction
         G4double fBEGeHeight;
         G4double fSArBrickHeight;
         G4double fSArBrickRadius;
+        G4double fArVolumeHeight;
+        G4double fArVolumeRadius;
+        G4double fArContainerHeight;
+        G4double fArContainerRadius;
+        G4double fArContainerThickness;
         G4double fASICWidth;
         G4double fASICLength;
         G4double fASICThickness;
@@ -420,13 +430,13 @@ inline const G4LogicalVolume* CDEXDetectorConstruction::GetLogicArVolumeSiPM() c
 inline const G4LogicalVolume* CDEXDetectorConstruction::GetArgonVolume(G4String mode) const
 {
     if (mode == "CDEXFiberBucketSetup") {
-        return logicArVolume_FiberBucket;
+        return logicArVolume;
     }
     else if (mode == "CDEXSiPMBucketSetup") {
-        return logicArVolume_SiPMBucket;
+        return logicArVolume;
     }
     else if (mode == "CDEX300") {
-        return logicArVolume_CDEX300;
+        return logicArVolume;
     }
 }
 
