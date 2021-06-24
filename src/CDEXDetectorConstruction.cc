@@ -117,7 +117,7 @@ CDEXDetectorConstruction::CDEXDetectorConstruction() : G4VUserDetectorConstructi
 	fWireType = "A1";
 	fReflectorType = "PolisherESR_LUT";
 	//fReflectorType = "PolisherESR_LUT";
-	fMode = "CDEXFiberBucketSetup";
+	fMode = "CDEXLightGuideBucketSetup";
 	fWirePos = G4ThreeVector();
 	fWireRadius = 0.7 * mm;
 	fWireLength = 4 * cm;
@@ -152,13 +152,14 @@ CDEXDetectorConstruction::CDEXDetectorConstruction() : G4VUserDetectorConstructi
 	//fFiberPlacementRadius = 0.295 * m;//LEGEND
 	fFiberPlacementCenter = G4ThreeVector(0, 0, 0);
 	fFiberLength = 3 * m;
+	fLightGuideLength=3*m;
 
 	fFiberRadius = 0.5 * mm;
 	fFiberTPBThickness = 0.6 * micrometer;
 	fFiberInnerCladdingThickness = 0.04 * mm;
 	fFiberOuterCladdingThickness = 0.02 * mm;
 
-	fLightGuideRadius = 5 * cm;
+	fLightGuideRadius = 30 * cm;
 	fLightGuideInnerRadius = 2 * cm;
 
 	fShellThickness = 5 * mm;
@@ -754,7 +755,7 @@ G4VPhysicalVolume *CDEXDetectorConstruction::Construct()
 	else if (fMode == "CDEXLightGuideBucketSetup")
 	{
 		//physWorld=ConstructFiberTestSetup();
-		return ConstructCDEX300();
+		return ConstructBucketLightGuideSystem();
 	}
 	else
 	{
@@ -2025,6 +2026,22 @@ G4LogicalVolume *CDEXDetectorConstruction::ConstructArContainer()
 //CDEX Bucket-Fiber Veto System Design
 
 G4LogicalVolume *CDEXDetectorConstruction::ConstructFiberBucket()
+{
+	G4double BucketRadius = fBucketRadius;
+	G4double BucketHeight = fBucketHeight;
+	G4double BucketThickness = fBucketThickness;
+	auto solidBucket = new G4Tubs("solidBucket", 0., BucketRadius, BucketHeight / 2, 0., twopi);
+	auto logicBucket = new G4LogicalVolume(solidBucket, matPMMA, "logicBucket");
+
+	auto solidArVolume = new G4Tubs("solidBucketCrystal", 0, BucketRadius - BucketThickness, BucketHeight / 2 - BucketThickness, 0, twopi);
+	logicArVolume = new G4LogicalVolume(solidArVolume, matLAr, "logicArVolume");
+	//logicBucketFiberCrystal = new G4LogicalVolume(solidBucketCrystal, matLAr, "logicBucket");
+	//logicArVolume = LV;
+	auto physArVolume = new G4PVPlacement(0, G4ThreeVector(), logicArVolume, "ArVolume", logicBucket, false, 0, CheckOverlaps);
+	return logicBucket;
+}
+
+G4LogicalVolume *CDEXDetectorConstruction::ConstructLightGuideBucket()
 {
 	G4double BucketRadius = fBucketRadius;
 	G4double BucketHeight = fBucketHeight;
@@ -3665,14 +3682,14 @@ G4VPhysicalVolume *CDEXDetectorConstruction::ConstructBucketFiberSystem()
 
 	G4PVPlacement *physArVolumeSiPMSet[2] = {nullptr};
 	auto logicArVolumeSiPMChip = ConstructArVolumeSiPM();
-	//physArVolumeSiPMSet[0] = new G4PVPlacement(0, G4ThreeVector(0, 0, fFiberLength / 2 + 3 * mm), logicArVolumeSiPMChip, "ArVolumeSiPM", logicArVolume, false, 0, checkOverlaps);
-	//physArVolumeSiPMSet[1] = new G4PVPlacement(0, G4ThreeVector(0, 0, -fFiberLength / 2 - 3 * mm), logicArVolumeSiPMChip, "ArVolumeSiPM", logicArVolume, false, 0, checkOverlaps);
-	// physArVolumeSiPMSet[2] = new G4PVPlacement(0, G4ThreeVector(15 * cm, 0, fFiberLength/2 + 3 * mm), logicArVolumeSiPMChip, "ArVolumeSiPM", logicArVolume_FiberBucket, false, 0, checkOverlaps);
-	// physArVolumeSiPMSet[3] = new G4PVPlacement(0, G4ThreeVector(-15 * cm, 0, fFiberLength/2 + 3 * mm), logicArVolumeSiPMChip, "ArVolumeSiPM", logicArVolume_FiberBucket, false, 0, checkOverlaps);
-	// physArVolumeSiPMSet[4] = new G4PVPlacement(0, G4ThreeVector(0, 15 * cm, -fFiberLength/2 - 3 * mm), logicArVolumeSiPMChip, "ArVolumeSiPM", logicArVolume_FiberBucket, false, 0, checkOverlaps);
-	// physArVolumeSiPMSet[5] = new G4PVPlacement(0, G4ThreeVector(0, -15 * cm, -fFiberLength/2 - 3 * mm), logicArVolumeSiPMChip, "ArVolumeSiPM", logicArVolume_FiberBucket, false, 0, checkOverlaps);
-	// physArVolumeSiPMSet[6] = new G4PVPlacement(0, G4ThreeVector(15 * cm, 0, -fFiberLength/2 - 3 * mm), logicArVolumeSiPMChip, "ArVolumeSiPM", logicArVolume_FiberBucket, false, 0, checkOverlaps);
-	// physArVolumeSiPMSet[7] = new G4PVPlacement(0, G4ThreeVector(-15 * cm, 0, -fFiberLength/2 - 3 * mm), logicArVolumeSiPMChip, "ArVolumeSiPM", logicArVolume_FiberBucket, false, 0, checkOverlaps);
+	physArVolumeSiPMSet[0] = new G4PVPlacement(0, G4ThreeVector(0, 0, fFiberLength / 2 + 3 * mm), logicArVolumeSiPMChip, "ArVolumeSiPM", logicArVolume, false, 0, checkOverlaps);
+	physArVolumeSiPMSet[1] = new G4PVPlacement(0, G4ThreeVector(0, 0, -fFiberLength / 2 - 3 * mm), logicArVolumeSiPMChip, "ArVolumeSiPM", logicArVolume, false, 1, checkOverlaps);
+	// physArVolumeSiPMSet[2] = new G4PVPlacement(0, G4ThreeVector(15 * cm, 0, fFiberLength/2 + 3 * mm), logicArVolumeSiPMChip, "ArVolumeSiPM", logicArVolume, false, 0, checkOverlaps);
+	// physArVolumeSiPMSet[3] = new G4PVPlacement(0, G4ThreeVector(-15 * cm, 0, fFiberLength/2 + 3 * mm), logicArVolumeSiPMChip, "ArVolumeSiPM", logicArVolume, false, 0, checkOverlaps);
+	// physArVolumeSiPMSet[4] = new G4PVPlacement(0, G4ThreeVector(0, 15 * cm, -fFiberLength/2 - 3 * mm), logicArVolumeSiPMChip, "ArVolumeSiPM", logicArVolume, false, 0, checkOverlaps);
+	// physArVolumeSiPMSet[5] = new G4PVPlacement(0, G4ThreeVector(0, -15 * cm, -fFiberLength/2 - 3 * mm), logicArVolumeSiPMChip, "ArVolumeSiPM", logicArVolume, false, 0, checkOverlaps);
+	// physArVolumeSiPMSet[6] = new G4PVPlacement(0, G4ThreeVector(15 * cm, 0, -fFiberLength/2 - 3 * mm), logicArVolumeSiPMChip, "ArVolumeSiPM", logicArVolume, false, 0, checkOverlaps);
+	// physArVolumeSiPMSet[7] = new G4PVPlacement(0, G4ThreeVector(-15 * cm, 0, -fFiberLength/2 - 3 * mm), logicArVolumeSiPMChip, "ArVolumeSiPM", logicArVolume, false, 0, checkOverlaps);
 
 	//=============================================================//
 	//                        Optical Surfaces                     //
@@ -4085,7 +4102,7 @@ G4VPhysicalVolume *CDEXDetectorConstruction::ConstructBucketLightGuideSystem()
 	//                            Bucket                           //
 	//=============================================================//
 	auto rotBucket = new G4RotationMatrix();
-	auto logicBucket = ConstructFiberBucket();
+	auto logicBucket = ConstructLightGuideBucket();
 	auto physBucket = new G4PVPlacement(rotBucket, G4ThreeVector(), logicBucket, "Bucket", logicEnv, false, 0, checkOverlaps);
 
 	//=============================================================//
@@ -4124,9 +4141,9 @@ G4VPhysicalVolume *CDEXDetectorConstruction::ConstructBucketLightGuideSystem()
 	logicASICPlate = ConstructASICPlate();
 
 	//=============================================================//
-	//                      Light Fiber Array                      //
+	//                         Light Guide                         //
 	//=============================================================//
-	ConstructLightFiberArray(logicArVolume_FiberBucket, fFiberPlacementCenter, fFiberPlacementRadius);
+	auto logicLightGuide=ConstructLightGuide(fLightGuideLength,matLAr);
 
 	//=============================================================//
 	//                           String                            //
@@ -4153,25 +4170,27 @@ G4VPhysicalVolume *CDEXDetectorConstruction::ConstructBucketLightGuideSystem()
 	{
 		G4ThreeVector PosUnit1 = G4ThreeVector(0, 0, (SmallestUnitHeight / 2 + SmallestUnitHeight * i));
 		G4ThreeVector PosUnit2 = G4ThreeVector(0, 0, (-SmallestUnitHeight / 2 - SmallestUnitHeight * i));
-		physPackedBEGe[2 * i] = new G4PVPlacement(RotBEGe, PosUnit1 + PosBEGe, logicShell, "PackedBEGe", logicArVolume_FiberBucket, false, 2 * i, checkOverlaps);
-		physPackedBEGe[2 * i + 1] = new G4PVPlacement(RotBEGe, PosUnit2 + PosBEGe, logicShell, "PackedBEGe", logicArVolume_FiberBucket, false, 2 * i + 1, checkOverlaps);
-		physWire[2 * i] = new G4PVPlacement(RotWire, PosUnit1 + PosWire, logicWire, "Wire", logicArVolume_FiberBucket, false, 2 * i, checkOverlaps);
-		physWire[2 * i + 1] = new G4PVPlacement(RotWire, PosUnit2 + PosWire, logicWire, "Wire", logicArVolume_FiberBucket, false, 2 * i + 1, checkOverlaps);
-		physASIC[2 * i] = new G4PVPlacement(RotASIC, PosUnit1 + PosASIC, logicASICPlate, "ASIC", logicArVolume_FiberBucket, false, 2 * i, checkOverlaps);
-		physASIC[2 * i + 1] = new G4PVPlacement(RotASIC, PosUnit2 + PosASIC, logicASICPlate, "ASIC", logicArVolume_FiberBucket, false, 2 * i + 1, checkOverlaps);
+		physPackedBEGe[2 * i] = new G4PVPlacement(RotBEGe, PosUnit1 + PosBEGe, logicShell, "PackedBEGe", logicArVolume, false, 2 * i, checkOverlaps);
+		physPackedBEGe[2 * i + 1] = new G4PVPlacement(RotBEGe, PosUnit2 + PosBEGe, logicShell, "PackedBEGe", logicArVolume, false, 2 * i + 1, checkOverlaps);
+		physWire[2 * i] = new G4PVPlacement(RotWire, PosUnit1 + PosWire, logicWire, "Wire", logicArVolume, false, 2 * i, checkOverlaps);
+		physWire[2 * i + 1] = new G4PVPlacement(RotWire, PosUnit2 + PosWire, logicWire, "Wire", logicArVolume, false, 2 * i + 1, checkOverlaps);
+		physASIC[2 * i] = new G4PVPlacement(RotASIC, PosUnit1 + PosASIC, logicASICPlate, "ASIC", logicArVolume, false, 2 * i, checkOverlaps);
+		physASIC[2 * i + 1] = new G4PVPlacement(RotASIC, PosUnit2 + PosASIC, logicASICPlate, "ASIC", logicArVolume, false, 2 * i + 1, checkOverlaps);
 	}
 
 	G4PVPlacement *physArVolumeSiPMSet[2] = {nullptr};
 	auto logicArVolumeSiPMChip = ConstructArVolumeSiPM();
-	physArVolumeSiPMSet[0] = new G4PVPlacement(0, G4ThreeVector(0, 0, fFiberLength / 2 + 3 * mm), logicArVolumeSiPMChip, "ArVolumeSiPM", logicArVolume_FiberBucket, false, 0, checkOverlaps);
-	physArVolumeSiPMSet[1] = new G4PVPlacement(0, G4ThreeVector(0, 0, -fFiberLength / 2 - 3 * mm), logicArVolumeSiPMChip, "ArVolumeSiPM", logicArVolume_FiberBucket, false, 0, checkOverlaps);
-	// physArVolumeSiPMSet[2] = new G4PVPlacement(0, G4ThreeVector(15 * cm, 0, fFiberLength/2 + 3 * mm), logicArVolumeSiPMChip, "ArVolumeSiPM", logicArVolume_FiberBucket, false, 0, checkOverlaps);
-	// physArVolumeSiPMSet[3] = new G4PVPlacement(0, G4ThreeVector(-15 * cm, 0, fFiberLength/2 + 3 * mm), logicArVolumeSiPMChip, "ArVolumeSiPM", logicArVolume_FiberBucket, false, 0, checkOverlaps);
-	// physArVolumeSiPMSet[4] = new G4PVPlacement(0, G4ThreeVector(0, 15 * cm, -fFiberLength/2 - 3 * mm), logicArVolumeSiPMChip, "ArVolumeSiPM", logicArVolume_FiberBucket, false, 0, checkOverlaps);
-	// physArVolumeSiPMSet[5] = new G4PVPlacement(0, G4ThreeVector(0, -15 * cm, -fFiberLength/2 - 3 * mm), logicArVolumeSiPMChip, "ArVolumeSiPM", logicArVolume_FiberBucket, false, 0, checkOverlaps);
-	// physArVolumeSiPMSet[6] = new G4PVPlacement(0, G4ThreeVector(15 * cm, 0, -fFiberLength/2 - 3 * mm), logicArVolumeSiPMChip, "ArVolumeSiPM", logicArVolume_FiberBucket, false, 0, checkOverlaps);
-	// physArVolumeSiPMSet[7] = new G4PVPlacement(0, G4ThreeVector(-15 * cm, 0, -fFiberLength/2 - 3 * mm), logicArVolumeSiPMChip, "ArVolumeSiPM", logicArVolume_FiberBucket, false, 0, checkOverlaps);
+	physArVolumeSiPMSet[0] = new G4PVPlacement(0, G4ThreeVector(0, 0, fFiberLength / 2 + 3 * mm), logicArVolumeSiPMChip, "ArVolumeSiPM", logicArVolume, false, 0, checkOverlaps);
+	physArVolumeSiPMSet[1] = new G4PVPlacement(0, G4ThreeVector(0, 0, -fFiberLength / 2 - 3 * mm), logicArVolumeSiPMChip, "ArVolumeSiPM", logicArVolume, false, 1, checkOverlaps);
+	// physArVolumeSiPMSet[2] = new G4PVPlacement(0, G4ThreeVector(15 * cm, 0, fFiberLength/2 + 3 * mm), logicArVolumeSiPMChip, "ArVolumeSiPM", logicArVolume, false, 0, checkOverlaps);
+	// physArVolumeSiPMSet[3] = new G4PVPlacement(0, G4ThreeVector(-15 * cm, 0, fFiberLength/2 + 3 * mm), logicArVolumeSiPMChip, "ArVolumeSiPM", logicArVolume, false, 0, checkOverlaps);
+	// physArVolumeSiPMSet[4] = new G4PVPlacement(0, G4ThreeVector(0, 15 * cm, -fFiberLength/2 - 3 * mm), logicArVolumeSiPMChip, "ArVolumeSiPM", logicArVolume, false, 0, checkOverlaps);
+	// physArVolumeSiPMSet[5] = new G4PVPlacement(0, G4ThreeVector(0, -15 * cm, -fFiberLength/2 - 3 * mm), logicArVolumeSiPMChip, "ArVolumeSiPM", logicArVolume, false, 0, checkOverlaps);
+	// physArVolumeSiPMSet[6] = new G4PVPlacement(0, G4ThreeVector(15 * cm, 0, -fFiberLength/2 - 3 * mm), logicArVolumeSiPMChip, "ArVolumeSiPM", logicArVolume, false, 0, checkOverlaps);
+	// physArVolumeSiPMSet[7] = new G4PVPlacement(0, G4ThreeVector(-15 * cm, 0, -fFiberLength/2 - 3 * mm), logicArVolumeSiPMChip, "ArVolumeSiPM", logicArVolume, false, 0, checkOverlaps);
 
+	auto physLightGuide=new G4PVPlacement(0,G4ThreeVector(),logicLightGuide,"LightGuide",logicArVolume, false, 0, checkOverlaps);
+	
 	//=============================================================//
 	//                        Optical Surfaces                     //
 	//=============================================================//

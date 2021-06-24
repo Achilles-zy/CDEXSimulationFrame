@@ -114,10 +114,13 @@
 /vis/geometry/set/visibility logicArVolume 0 false
 /vis/geometry/set/visibility logicArVolume_FiberBucket 0 false
 /vis/geometry/set/visibility logicArVolume_CDEX300 0 false
+/vis/geometry/set/visibility logicLightGuide 0 false
 
 # "Envelope" is transparent blue to represent water
 
-/vis/geometry/set/colour logicEnvelope 0.5 0.5 0 0 0.5
+/vis/geometry/set/colour logicLightGuideInnerTPB 0 0.5 0.5 0.5 0.5
+/vis/geometry/set/colour logicLightGuideOuterTPB 0 0.5 0.5 0.5 0.5
+/vis/geometry/set/colour logicLightGuideReflector 0 0.5 0.5 0.5 0.5
 /vis/geometry/set/colour logicFiberOuterCladding 0 0.5 0 0 0.5
 /vis/geometry/set/colour logicFiberInnerCladding 0 0 0.5 0.5 0.5
 #/vis/geometry/set/colour logicFiberWLSLayer 0 1 1 0 0.5

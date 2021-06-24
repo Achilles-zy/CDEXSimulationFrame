@@ -99,6 +99,7 @@ class CDEXDetectorConstruction : public G4VUserDetectorConstruction
         G4LogicalVolume* ConstructArVolumeSiPM();
 
         G4VPhysicalVolume* ConstructBucketLightGuideSystem();
+        G4LogicalVolume* ConstructLightGuideBucket();
         G4LogicalVolume* ConstructLightGuide(G4double length,G4Material* Envmat);
         G4LogicalVolume* ConstructRecLightGuide(G4double length,G4Material* Envmat);  
         
@@ -381,6 +382,7 @@ class CDEXDetectorConstruction : public G4VUserDetectorConstruction
         G4double fLightGuideRadius;
         G4double fShellThickness;
         G4double fFiberPlacementRadius;
+        G4double fLightGuideLength;
         G4ThreeVector fFiberPlacementCenter;
 
         CDEXDetectorMessenger* fDetectorMessenger;

@@ -105,7 +105,7 @@ void CDEXPrimaryGeneratorAction::GeneratePrimaries(G4Event *anEvent)
 		}
 	}
 
-	if (mode == "CDEXFiberBucketSetup")
+	if (mode == "CDEXFiberBucketSetup"||mode == "CDEXLightGuideBucketSetup")
 	{
 		if (fSrcType == "Bucket")
 		{

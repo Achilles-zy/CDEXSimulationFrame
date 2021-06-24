@@ -75,7 +75,7 @@ CDEXRunAction::CDEXRunAction(CDEXPrimaryGeneratorAction *gen, CDEXDetectorConstr
 		analysisManager->FinishNtuple(3);
 	}
 
-	else if (fDetCons->GetMode() == "CDEXFiberBucketSetup")
+	else if (fDetCons->GetMode() == "CDEXFiberBucketSetup"||fDetCons->GetMode() == "CDEXLightGuideBucketSetup")
 	{
 		analysisManager->CreateNtuple("RunSum", "Run Summary");
 		analysisManager->CreateNtupleIColumn(0, "TotalEventCount");
@@ -107,6 +107,7 @@ CDEXRunAction::CDEXRunAction(CDEXPrimaryGeneratorAction *gen, CDEXDetectorConstr
 
 		analysisManager->FinishNtuple(2);
 	}
+
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -140,6 +141,14 @@ void CDEXRunAction::BeginOfRunAction(const G4Run *aRun)
 		analysisManager->OpenFile(filename);
 		accumulableManager->Reset();
 	}
+	else if (fDetCons->GetMode() == "CDEXLightGuideBucketSetup")
+	{
+		filename = "CDEXLightGuideBucketSetup_" + fPrimaryGenerator->GetSrcType();
+		txtname = "CDEXLightGuideBucketSetup_" + fPrimaryGenerator->GetSrcType();
+		analysisManager->OpenFile(filename);
+		accumulableManager->Reset();
+	}
+
 
 	if (G4RunManager::GetRunManager()->GetRunManagerType() == 1)
 	{
@@ -178,7 +187,7 @@ void CDEXRunAction::EndOfRunAction(const G4Run *aRun)
 		}
 	}
 
-	else if (fDetCons->GetMode() == "CDEXFiberBucketSetup")
+	else if (fDetCons->GetMode() == "CDEXFiberBucketSetup"||fDetCons->GetMode() == "CDEXLightGuideBucketSetup")
 	{
 		accumulableManager->Merge();
 		if (G4RunManager::GetRunManager()->GetRunManagerType() != 1)

@@ -72,7 +72,7 @@ void CDEXEventAction::BeginOfEventAction(const G4Event *evt)
 		TempPosList.clear();
 		TempPosListInScintillator.clear();
 	}
-	else if (CDEXCons->GetMode() == "CDEXFiberBucketSetup")
+	else if (CDEXCons->GetMode() == "CDEXFiberBucketSetup"||CDEXCons->GetMode() == "CDEXLightGuideBucketSetup")
 	{
 		EdepBulk = 0;
 		memset(EdepBulkDet, 0, sizeof(EdepBulkDet));
@@ -164,7 +164,7 @@ void CDEXEventAction::EndOfEventAction(const G4Event *evt)
 			}
 		}
 	}
-	if (CDEXCons->GetMode() == "CDEXFiberBucketSetup")
+	if (CDEXCons->GetMode() == "CDEXFiberBucketSetup"||CDEXCons->GetMode() == "CDEXLightGuideBucketSetup")
 	{
 		auto analysisManager = G4AnalysisManager::Instance();
 		analysisManager->FillNtupleDColumn(2, 0, EdepBulk);

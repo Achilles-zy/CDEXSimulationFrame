@@ -82,7 +82,7 @@ void CDEXSteppingAction::UserSteppingAction(const G4Step *aStep)
 		}
 	}
 
-	if (CDEXCons->GetMode() == "CDEXFiberBucketSetup")
+	if (CDEXCons->GetMode() == "CDEXFiberBucketSetup"||CDEXCons->GetMode() == "CDEXLightGuideBucketSetup")
 	{
 
 		//G4cout << "EnableAcc: " << CDEXRun->GetAccelerate() << G4endl;
