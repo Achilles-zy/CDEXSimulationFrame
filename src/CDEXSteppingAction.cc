@@ -126,7 +126,9 @@ void CDEXSteppingAction::UserSteppingAction(const G4Step *aStep)
 		//For Acceleraiton
 		#ifdef ACCTRUE
 		G4int SiPMSignalCnt=CDEXEvent->GetSiPMSignalCnt();
-		if (SiPMSignalCnt>1&&ParticleName=="opticalphoton"){
+		G4int SignalSiPMCount=CDEXEvent->GetSignalSiPMCount();
+		//if (SiPMSignalCnt>1&&ParticleName=="opticalphoton"){
+		if (SignalSiPMCount>=1&&ParticleName=="opticalphoton"){			
 			aStep->GetTrack()->SetTrackStatus(fStopAndKill);
 		}
 		#endif
@@ -156,6 +158,7 @@ void CDEXSteppingAction::UserSteppingAction(const G4Step *aStep)
 				if (rnd < SiPMEff)
 				{
 					CDEXEvent->CountSiPMSignal();
+					CDEXEvent->CountSignalSiPM(SiPMType,SiPMID);
 				}
 				aStep->GetTrack()->SetTrackStatus(fStopAndKill);
 			}
@@ -178,6 +181,7 @@ void CDEXSteppingAction::UserSteppingAction(const G4Step *aStep)
 				if (rnd < SiPMEff)
 				{
 					CDEXEvent->CountSiPMSignal();
+					CDEXEvent->CountSignalSiPM(SiPMType,SiPMID);
 				}
 				aStep->GetTrack()->SetTrackStatus(fStopAndKill);
 			}

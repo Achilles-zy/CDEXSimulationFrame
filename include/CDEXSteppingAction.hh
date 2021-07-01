@@ -86,7 +86,6 @@ private:
   CDEXEventAction *CDEXEvent;
   CDEXRunAction *CDEXRun;
   CDEXDetectorConstruction *CDEXCons;
-  G4int SignalSiPMCount;
   G4int ContainerSignalSiPMCount;
 };
 

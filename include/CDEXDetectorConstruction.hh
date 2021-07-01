@@ -96,18 +96,19 @@ class CDEXDetectorConstruction : public G4VUserDetectorConstruction
         G4LogicalVolume* ConstructLightFiber(G4double length);
         G4LogicalVolume* ConstructFiberBucket();
         G4LogicalVolume* ConstructFiberSiPM();
-        G4LogicalVolume* ConstructArVolumeSiPM();
+        G4LogicalVolume* ConstructArVolumeSiPM(G4double radius);
+        G4LogicalVolume* ConstructArVolumeHexSiPM(G4double circumradius);
+
 
         G4VPhysicalVolume* ConstructBucketLightGuideSystem();
         G4LogicalVolume* ConstructLightGuideBucket();
-        G4LogicalVolume* ConstructLightGuide(G4double length,G4Material* Envmat);
+        G4LogicalVolume* ConstructLightGuide(G4double length,G4double radius, G4Material* Envmat);
+        G4LogicalVolume* ConstructHexLightGuide(G4double length,G4double circumradius,G4Material* Envmat);
         G4LogicalVolume* ConstructRecLightGuide(G4double length,G4Material* Envmat);  
         
         //CDEX300
         G4LogicalVolume* ConstructCDEX300Bucket(G4double shieldthickness);
         G4LogicalVolume* ConstructShell();
-
-
 
         void ConstructLightFiberArray(G4LogicalVolume* motherLV, G4ThreeVector pos, G4double radius);
 

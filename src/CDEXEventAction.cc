@@ -30,12 +30,14 @@ CDEXEventAction::CDEXEventAction(CDEXRunAction *runaction, CDEXDetectorConstruct
 //Distribution_Results("Distribution_Results","Distribution_Results")
 {
 	SignalSiPMCount = 0;
+	SiPMVetoThreshold=1;
 	EnergyThreshold = 160 * eV;
 	DepositeID = 0;
 	fEventID = 0;
 	RowNb = sizeof(SiPMPhotonCount) / sizeof(SiPMPhotonCount[0]);
 	ColumnNb = sizeof(SiPMPhotonCount[0]) / sizeof(SiPMPhotonCount[0][0]);
 	DetNumber = DETNUMBER;
+	MinSignalSiPMCount = 1;
 }
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -60,7 +62,7 @@ void CDEXEventAction::BeginOfEventAction(const G4Event *evt)
 		Total = 0;
 		TotalSiPMPhotonCount = 0;
 		SignalSiPMCount = 0;
-		MinSignalSiPMCount = 1;
+
 
 		ifBulk = false;
 		ifROI = false;
@@ -72,17 +74,19 @@ void CDEXEventAction::BeginOfEventAction(const G4Event *evt)
 		TempPosList.clear();
 		TempPosListInScintillator.clear();
 	}
-	else if (CDEXCons->GetMode() == "CDEXFiberBucketSetup"||CDEXCons->GetMode() == "CDEXLightGuideBucketSetup")
+	else if (CDEXCons->GetMode() == "CDEXFiberBucketSetup" || CDEXCons->GetMode() == "CDEXLightGuideBucketSetup")
 	{
 		EdepBulk = 0;
 		memset(EdepBulkDet, 0, sizeof(EdepBulkDet));
 		memset(SiPMPhotonCount, 0, sizeof(SiPMPhotonCount));
 		memset(SiPMSignalCount, 0, sizeof(SiPMPhotonCount));
 
+		TempSiPMList.clear();
+
 		Total = 0;
 		TotalSiPMPhotonCount = 0;
 		SiPMSignalCnt = 0;
-		MinSignalSiPMCount = 1;
+		SignalSiPMCount=0;
 
 		ifBulk = false;
 		ifROI = false;
@@ -164,7 +168,7 @@ void CDEXEventAction::EndOfEventAction(const G4Event *evt)
 			}
 		}
 	}
-	if (CDEXCons->GetMode() == "CDEXFiberBucketSetup"||CDEXCons->GetMode() == "CDEXLightGuideBucketSetup")
+	if (CDEXCons->GetMode() == "CDEXFiberBucketSetup" || CDEXCons->GetMode() == "CDEXLightGuideBucketSetup")
 	{
 		auto analysisManager = G4AnalysisManager::Instance();
 		analysisManager->FillNtupleDColumn(2, 0, EdepBulk);
@@ -202,7 +206,7 @@ void CDEXEventAction::EndOfEventAction(const G4Event *evt)
 			{
 				run->CountVetoPossibleEvent();
 			}
-			if (SiPMSignalCnt > 0)
+			if (SignalSiPMCount >= SiPMVetoThreshold)
 			{
 				run->CountVetoEvent();
 			}
@@ -215,7 +219,7 @@ void CDEXEventAction::EndOfEventAction(const G4Event *evt)
 			{
 				run->CountROIVetoPossibleEvent();
 			}
-			if (SiPMSignalCnt > 0)
+			if (SignalSiPMCount >= SiPMVetoThreshold)
 			{
 				run->CountROIVetoEvent();
 			}
@@ -224,7 +228,6 @@ void CDEXEventAction::EndOfEventAction(const G4Event *evt)
 		// 	G4cout<<EdepBulkDet[i]<<" ";
 		// }
 		// G4cout<<G4endl;
-		
 	}
 }
 
@@ -336,6 +339,34 @@ void CDEXEventAction::GetEdepStatus()
 		if (EdepBulkDet[i] > 2000 * eV && EdepBulkDet[i] < 2100 * eV)
 		{
 			ifROI = true;
+		}
+	}
+}
+
+void CDEXEventAction::CountSignalSiPM(G4int sipmtype, G4int sipmid)
+{
+	G4bool ifNewSiPM = true;
+	std::vector<G4int> SiPMName;
+	SiPMName.push_back(sipmtype);
+	SiPMName.push_back(sipmid);
+	if (TempSiPMList.empty())
+	{
+		TempSiPMList.push_back(SiPMName);
+		SignalSiPMCount += 1;
+	}
+	else
+	{
+		for (G4int i = 0; i < TempSiPMList.size(); i++)
+		{
+			if (sipmtype == TempSiPMList[i][0] && sipmid == TempSiPMList[i][1])
+			{
+				ifNewSiPM = false;
+			}
+		}
+		if (ifNewSiPM == true)
+		{
+			SignalSiPMCount += 1;
+			TempSiPMList.push_back(SiPMName);
 		}
 	}
 }

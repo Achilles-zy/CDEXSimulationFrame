@@ -30,7 +30,9 @@ public:
   G4int GetTotalSiPMPhotonCnt() { return TotalSiPMPhotonCount; }
   G4int GetEventID() { return fEventID; }
   G4int GetSiPMSignalCnt(){return SiPMSignalCnt;}
+  G4int GetSignalSiPMCount(){return SignalSiPMCount;}
   void CountSiPMSignal() { SiPMSignalCnt += 1; }
+  void CountSignalSiPM(G4int SiPMType,G4int SiPMID);
   void AddToSiPM(G4int, G4int);
   void AddToSiPMSignal(G4int, G4int);
   G4int GetSiPMPhotonCount(G4int j, G4int k) { return SiPMPhotonCount[j][k]; }
@@ -62,6 +64,7 @@ private:
   G4int DetNumber;
   G4double EnergyThreshold;
 
+  G4int SiPMVetoThreshold;
   G4bool ifBulk;
   G4bool ifROI;
   G4bool ifSiPM;
@@ -73,6 +76,8 @@ private:
 
   std::vector<std::vector<G4double>> TempPosList;
   std::vector<std::vector<G4double>> TempPosListInScintillator;
+
+  std::vector<std::vector<G4int>> TempSiPMList;
 
   CDEXRunAction *run;
   CDEXDetectorConstruction *CDEXCons;

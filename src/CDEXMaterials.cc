@@ -1546,7 +1546,7 @@ void CDEXMaterials::RegisterArgonOpticalProperties()
     G4MaterialPropertiesTable *myMPT1 = new G4MaterialPropertiesTable();
 
     myMPT1->AddProperty("RINDEX", LAr_PPCK, LAr_RIND, NUMENTRIES);
-    //myMPT1->AddProperty("RAYLEIGH", LAr_PPCK, LAr_RAYL, NUMENTRIES);
+    myMPT1->AddProperty("RAYLEIGH", LAr_PPCK, LAr_RAYL, NUMENTRIES);
     myMPT1->AddProperty("ABSLENGTH", LAr_PPCK, LAr_ABSL, NUMENTRIES);
 
     // Fast and slow components of the scintillation
