@@ -21,6 +21,8 @@
 # Use this open statement to create a .wrl file suitable for
 # viewing in a VRML viewer:
 #/vis/open VRML2FILE
+
+/vis/viewer/set/background 0.71 0.7 0.71
 #
 # Disable auto refresh and quieten vis messages whilst scene and
 # trajectories are established:
@@ -91,11 +93,11 @@
 #/vis/scene/add/logo    # 3D logo
 #
 # Frame
-/vis/set/colour red
-/vis/set/lineWidth 2
-/vis/scene/add/frame   # Simple frame around the view
-/vis/set/colour        # Revert to default colour (white)
-/vis/set/lineWidth     # Revert to default line width (1.)
+#/vis/set/colour red
+#/vis/set/lineWidth 2
+#/vis/scene/add/frame   # Simple frame around the view
+#/vis/set/colour        # Revert to default colour (white)
+#/vis/set/lineWidth     # Revert to default line width (1.)
 #
 # Attach text to one edge of Shape1, with a small, fixed offset
 #/vis/scene/add/text 0 6 -4 cm 18 4 4 Shape1
@@ -121,11 +123,11 @@
 /vis/geometry/set/colour logicLightGuideInnerTPB 0 0.5 0.5 0.5 0.5
 /vis/geometry/set/colour logicLightGuideOuterTPB 0 0.5 0.5 0.5 0.5
 /vis/geometry/set/colour logicLightGuideReflector 0 0.5 0.5 0.5 0.5
-/vis/geometry/set/colour logicFiberOuterCladding 0 0.5 0 0 0.5
+/vis/geometry/set/colour logicFiberOuterCladding 0 0 0.5 0.5 0.5
 /vis/geometry/set/colour logicFiberInnerCladding 0 0 0.5 0.5 0.5
-#/vis/geometry/set/colour logicFiberWLSLayer 0 1 1 0 0.5
-/vis/geometry/set/colour logicFiber 0 0.5 0.5 0.5 0.5
-/vis/geometry/set/colour logicFiberCore 0 0.5 0.5 0.5 0.5
+#/vis/geometry/set/colour logicFiberWLSLayer 0 0 0.5 0.5 0.5
+/vis/geometry/set/colour logicFiber 0 0 0.5 0.5 0.5
+/vis/geometry/set/colour logicFiberCore 0 0 0.5 0.5 0.5
 /vis/geometry/set/colour logicBucketSSWall 0 0.5 0.5 0.5 0.5
 /vis/geometry/set/colour logicBucketVacuumLayer 0 0 0 0.5 0.5
 /vis/geometry/set/colour logicCuShield 0 0.5 0.5 0 0.5
