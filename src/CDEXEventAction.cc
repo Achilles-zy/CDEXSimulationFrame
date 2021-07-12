@@ -31,6 +31,10 @@ CDEXEventAction::CDEXEventAction(CDEXRunAction *runaction, CDEXDetectorConstruct
 {
 	SignalSiPMCount = 0;
 	SiPMVetoThreshold=1;
+	SiPMVetoThreshold1=2;
+	SiPMVetoThreshold2=3;
+	SiPMVetoThreshold3=4;
+	SiPMVetoThreshold4=5;
 	EnergyThreshold = 160 * eV;
 	DepositeID = 0;
 	fEventID = 0;
@@ -74,7 +78,7 @@ void CDEXEventAction::BeginOfEventAction(const G4Event *evt)
 		TempPosList.clear();
 		TempPosListInScintillator.clear();
 	}
-	else if (CDEXCons->GetMode() == "CDEXFiberBucketSetup" || CDEXCons->GetMode() == "CDEXLightGuideBucketSetup")
+	else if (CDEXCons->GetMode() == "CDEXFiberBucketSetup" || CDEXCons->GetMode() == "CDEXLightGuideBucketSetup"|| CDEXCons->GetMode() == "CDEXArParametersTest")
 	{
 		EdepBulk = 0;
 		memset(EdepBulkDet, 0, sizeof(EdepBulkDet));
@@ -168,7 +172,7 @@ void CDEXEventAction::EndOfEventAction(const G4Event *evt)
 			}
 		}
 	}
-	if (CDEXCons->GetMode() == "CDEXFiberBucketSetup" || CDEXCons->GetMode() == "CDEXLightGuideBucketSetup")
+	if (CDEXCons->GetMode() == "CDEXFiberBucketSetup" || CDEXCons->GetMode() == "CDEXLightGuideBucketSetup"|| CDEXCons->GetMode() == "CDEXArParametersTest")
 	{
 		auto analysisManager = G4AnalysisManager::Instance();
 		analysisManager->FillNtupleDColumn(2, 0, EdepBulk);
@@ -208,7 +212,23 @@ void CDEXEventAction::EndOfEventAction(const G4Event *evt)
 			}
 			if (SignalSiPMCount >= SiPMVetoThreshold)
 			{
-				run->CountVetoEvent();
+				run->CountVetoEvent(0);
+			}
+			if (SignalSiPMCount >= SiPMVetoThreshold1)
+			{
+				run->CountVetoEvent(1);
+			}
+			if (SignalSiPMCount >= SiPMVetoThreshold2)
+			{
+				run->CountVetoEvent(2);
+			}
+			if (SignalSiPMCount >= SiPMVetoThreshold3)
+			{
+				run->CountVetoEvent(3);
+			}
+			if (SignalSiPMCount >= SiPMVetoThreshold4)
+			{
+				run->CountVetoEvent(4);
 			}
 		}
 
@@ -221,7 +241,23 @@ void CDEXEventAction::EndOfEventAction(const G4Event *evt)
 			}
 			if (SignalSiPMCount >= SiPMVetoThreshold)
 			{
-				run->CountROIVetoEvent();
+				run->CountROIVetoEvent(0);
+			}
+			if (SignalSiPMCount >= SiPMVetoThreshold1)
+			{
+				run->CountROIVetoEvent(1);
+			}
+			if (SignalSiPMCount >= SiPMVetoThreshold2)
+			{
+				run->CountROIVetoEvent(2);
+			}
+			if (SignalSiPMCount >= SiPMVetoThreshold3)
+			{
+				run->CountROIVetoEvent(3);
+			}
+			if (SignalSiPMCount >= SiPMVetoThreshold4)
+			{
+				run->CountROIVetoEvent(4);
 			}
 		}
 		// for(G4int i=0;i<DETNUMBER;i++){

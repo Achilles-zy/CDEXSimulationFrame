@@ -21,7 +21,6 @@
 #include "G4LossTableManager.hh"
 #include "G4EmSaturation.hh"
 
-
 #include "G4BosonConstructor.hh"
 #include "G4LeptonConstructor.hh"
 #include "G4MesonConstructor.hh"
@@ -31,13 +30,13 @@
 
 G4ThreadLocal G4int CDEXOpticalPhysics::fVerboseLevel = 0;
 G4ThreadLocal G4int CDEXOpticalPhysics::fMaxNumPhotonStep = 20;
-G4ThreadLocal G4Cerenkov* CDEXOpticalPhysics::fCerenkovProcess = 0;
-G4ThreadLocal G4Scintillation* CDEXOpticalPhysics::fScintillationProcess = 0;
-G4ThreadLocal G4OpAbsorption* CDEXOpticalPhysics::fAbsorptionProcess = 0;
-G4ThreadLocal G4OpRayleigh* CDEXOpticalPhysics::fRayleighScatteringProcess = 0;
-G4ThreadLocal G4OpMieHG* CDEXOpticalPhysics::fMieHGScatteringProcess = 0;
-G4ThreadLocal G4OpBoundaryProcess* CDEXOpticalPhysics::fBoundaryProcess = 0;
-G4ThreadLocal G4OpWLS* CDEXOpticalPhysics::fWLSProcess = 0;
+G4ThreadLocal G4Cerenkov *CDEXOpticalPhysics::fCerenkovProcess = 0;
+G4ThreadLocal G4Scintillation *CDEXOpticalPhysics::fScintillationProcess = 0;
+G4ThreadLocal G4OpAbsorption *CDEXOpticalPhysics::fAbsorptionProcess = 0;
+G4ThreadLocal G4OpRayleigh *CDEXOpticalPhysics::fRayleighScatteringProcess = 0;
+G4ThreadLocal G4OpMieHG *CDEXOpticalPhysics::fMieHGScatteringProcess = 0;
+G4ThreadLocal G4OpBoundaryProcess *CDEXOpticalPhysics::fBoundaryProcess = 0;
+G4ThreadLocal G4OpWLS *CDEXOpticalPhysics::fWLSProcess = 0;
 
 CDEXOpticalPhysics::CDEXOpticalPhysics() : G4VPhysicsConstructor()
 {
@@ -55,7 +54,7 @@ CDEXOpticalPhysics::~CDEXOpticalPhysics()
 
 void CDEXOpticalPhysics::ConstructProcess()
 {
-    
+
     fCerenkovProcess = new G4Cerenkov("Cerenkov");
     fCerenkovProcess->SetMaxNumPhotonsPerStep(fMaxNumPhotonStep);
     fCerenkovProcess->SetMaxBetaChangePerStep(10.0);
@@ -66,12 +65,12 @@ void CDEXOpticalPhysics::ConstructProcess()
 
     fScintillationProcess = new G4Scintillation("Scintillation");
     fScintillationProcess->SetScintillationYieldFactor(1.0);
-    fScintillationProcess->SetScintillationExcitationRatio(0.0);//Line added by Luis
+    fScintillationProcess->SetScintillationExcitationRatio(0.0); //Line added by Luis
     fScintillationProcess->SetTrackSecondariesFirst(true);
     fScintillationProcess->SetVerboseLevel(OpVerbLevel);
 
     // scintillation process for alpha:
-    G4Scintillation* theScintProcessAlpha = new G4Scintillation("Scintillation");
+    G4Scintillation *theScintProcessAlpha = new G4Scintillation("Scintillation");
     // theScintProcessNuc->DumpPhysicsTable();
     theScintProcessAlpha->SetTrackSecondariesFirst(true);
     theScintProcessAlpha->SetScintillationYieldFactor(1.1);
@@ -79,7 +78,7 @@ void CDEXOpticalPhysics::ConstructProcess()
     theScintProcessAlpha->SetVerboseLevel(OpVerbLevel);
 
     // scintillation process for heavy nuclei
-    G4Scintillation* theScintProcessNuc = new G4Scintillation("Scintillation");
+    G4Scintillation *theScintProcessNuc = new G4Scintillation("Scintillation");
     // theScintProcessNuc->DumpPhysicsTable();
     theScintProcessNuc->SetTrackSecondariesFirst(true);
     theScintProcessNuc->SetScintillationYieldFactor(0.2);
@@ -97,44 +96,52 @@ void CDEXOpticalPhysics::ConstructProcess()
     fRayleighScatteringProcess->SetVerboseLevel(fVerboseLevel);
     fMieHGScatteringProcess->SetVerboseLevel(fVerboseLevel);
     fBoundaryProcess->SetVerboseLevel(fVerboseLevel);
-    
+
     // Use Birks Correction in the Scintillation process
     if (G4Threading::IsMasterThread())
     {
-        G4EmSaturation* emSaturation = G4LossTableManager::Instance()->EmSaturation();
+        G4EmSaturation *emSaturation = G4LossTableManager::Instance()->EmSaturation();
         fScintillationProcess->AddSaturation(emSaturation);
     }
-    
+
     auto particleIterator = GetParticleIterator();
     particleIterator->reset();
 
-    while ((*particleIterator)()) {
-        G4ParticleDefinition* particle = particleIterator->value();
-        G4ProcessManager* pmanager = particle->GetProcessManager();
+    while ((*particleIterator)())
+    {
+        G4ParticleDefinition *particle = particleIterator->value();
+        G4ProcessManager *pmanager = particle->GetProcessManager();
         G4String particleName = particle->GetParticleName();
-        if (fCerenkovProcess->IsApplicable(*particle)) {
+        if (fCerenkovProcess->IsApplicable(*particle))
+        {
             pmanager->AddProcess(fCerenkovProcess);
             pmanager->SetProcessOrdering(fCerenkovProcess, idxPostStep);
         }
         //if (fScintillationProcess->IsApplicable(*particle) && particle->GetParticleType() != "nucleus") {
-        if (fScintillationProcess->IsApplicable(*particle)) {
-            if (particle->GetParticleName() == "GenericIon") {
+        if (fScintillationProcess->IsApplicable(*particle))
+        {
+            if (particle->GetParticleName() == "GenericIon")
+            {
                 pmanager->AddProcess(theScintProcessNuc); // AtRestDiscrete
-                //pmanager->SetProcessOrderingToLast(theScintProcessNuc, idxAtRest);
-                //pmanager->SetProcessOrderingToLast(theScintProcessNuc, idxPostStep);
+                pmanager->SetProcessOrderingToLast(theScintProcessNuc, idxAtRest);
+                pmanager->SetProcessOrderingToLast(theScintProcessNuc, idxPostStep);
             }
-            else if (particle->GetParticleName() == "alpha") {
+            else if (particle->GetParticleName() == "alpha")
+            {
                 pmanager->AddProcess(theScintProcessAlpha);
-                //pmanager->SetProcessOrderingToLast(theScintProcessAlpha, idxAtRest);
-                //pmanager->SetProcessOrderingToLast(theScintProcessAlpha, idxPostStep);
+                pmanager->SetProcessOrderingToLast(theScintProcessAlpha, idxAtRest);
+                pmanager->SetProcessOrderingToLast(theScintProcessAlpha, idxPostStep);
             }
-            else {
+            else
+            {
                 pmanager->AddProcess(fScintillationProcess);
-                //pmanager->SetProcessOrderingToLast(fScintillationProcess, idxAtRest);
-                //pmanager->SetProcessOrderingToLast(fScintillationProcess, idxPostStep);
+                pmanager->SetProcessOrderingToLast(fScintillationProcess, idxAtRest);
+                pmanager->SetProcessOrderingToLast(fScintillationProcess, idxPostStep);
             }
         }
-        if (particleName == "opticalphoton") {
+        
+        if (particleName == "opticalphoton")
+        {
             G4cout << " AddDiscreteProcess to OpticalPhoton " << G4endl;
             pmanager->AddDiscreteProcess(fAbsorptionProcess);
             pmanager->AddDiscreteProcess(fRayleighScatteringProcess);
@@ -142,10 +149,9 @@ void CDEXOpticalPhysics::ConstructProcess()
             pmanager->AddDiscreteProcess(fBoundaryProcess);
             pmanager->AddDiscreteProcess(fWLSProcess);
         }
-        }
+        
     }
-
-
+}
 
 void CDEXOpticalPhysics::ConstructParticle()
 {

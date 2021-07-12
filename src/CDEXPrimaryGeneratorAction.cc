@@ -16,7 +16,7 @@ CDEXPrimaryGeneratorAction::CDEXPrimaryGeneratorAction(CDEXDetectorConstruction 
 																						fPrimaryE(0),
 																						fInitialE(1 * keV),
 																						fPrimaryName(""),
-																						fSrcType("ArVolume")
+																						fSrcType("Wire")
 {
 	fCDEXGPS = new G4GeneralParticleSource();
 	fPrimaryMessenger = new CDEXPrimaryGeneratorMessenger(this);
@@ -105,7 +105,7 @@ void CDEXPrimaryGeneratorAction::GeneratePrimaries(G4Event *anEvent)
 		}
 	}
 
-	if (mode == "CDEXFiberBucketSetup"||mode == "CDEXLightGuideBucketSetup")
+	if (mode == "CDEXFiberBucketSetup" || mode == "CDEXLightGuideBucketSetup" || mode == "CDEXArParametersTest")
 	{
 		if (fSrcType == "Bucket")
 		{
@@ -178,7 +178,7 @@ void CDEXPrimaryGeneratorAction::GeneratePrimaries(G4Event *anEvent)
 			fCDEXGPS->GetCurrentSource()->GetPosDist()->SetRadius(Radius);
 			fCDEXGPS->GetCurrentSource()->GetPosDist()->SetHalfZ(Length / 2);
 			fCDEXGPS->GetCurrentSource()->GetPosDist()->SetCentreCoords(WirePos);
-			//fCDEXGPS->GetCurrentSource()->GetPosDist()->ConfineSourceToVolume("Wire");
+			//fCDEXGPS->GetCurrentSource()->GetPosDist()->ConfineSourceToVolume();
 		}
 
 		else if (fSrcType == "Fiber")
@@ -239,6 +239,26 @@ void CDEXPrimaryGeneratorAction::GeneratePrimaries(G4Event *anEvent)
 		}
 	}
 
+	if (mode == "CDEXArExpSetup"){
+		if (fSrcType == "Point"){
+			//fCDEXGPS->GetCurrentSource()->SetParticleDefinition(particleTable->FindParticle("opticalphoton"));
+			//fCDEXGPS->GetCurrentSource()->SetParticlePolarization(G4ThreeVector(1,1,1));
+			fCDEXGPS->GetCurrentSource()->GetEneDist()->SetEnergyDisType("Mono");
+			//fCDEXGPS->GetCurrentSource()->GetEneDist()->SetMonoEnergy(PhotonEnergy);
+			//fCDEXGPS->GetCurrentSource()->GetEneDist()->SetMonoEnergy(1*MeV);
+			fCDEXGPS->GetCurrentSource()->GetAngDist()->SetAngDistType("iso");
+			fCDEXGPS->GetCurrentSource()->GetPosDist()->SetPosDisType("Point");
+			//fCDEXGPS->GetCurrentSource()->GetPosDist()->SetPosDisShape("Cylinder");
+			fCDEXGPS->GetCurrentSource()->GetPosDist()->SetCentreCoords(G4ThreeVector(0, 0, 0));
+			// fCDEXGPS->GetCurrentSource()->GetAngDist()->SetMinPhi(-90 * degree);
+			// fCDEXGPS->GetCurrentSource()->GetAngDist()->SetMaxPhi(90 * degree);
+			// fCDEXGPS->GetCurrentSource()->GetAngDist()->SetMinTheta(0 * degree);
+			// fCDEXGPS->GetCurrentSource()->GetAngDist()->SetMaxTheta(180 * degree);
+			// fCDEXGPS->GetCurrentSource()->GetPosDist()->SetRadius(Radius);
+			// fCDEXGPS->GetCurrentSource()->GetPosDist()->SetHalfZ(Length / 2);
+			// fCDEXGPS->GetCurrentSource()->GetPosDist()->ConfineSourceToVolume("Wire");
+		}
+	}
 	fCDEXGPS->GeneratePrimaryVertex(anEvent);
 
 	if (anEvent->GetEventID() == 0)

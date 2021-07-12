@@ -61,6 +61,7 @@
 #include "G4LogicalSkinSurface.hh"
 #include "G4NistManager.hh"
 #include "G4MTRunManager.hh"
+#include "CDEXDetectorConstruction.hh"
 
 using namespace std;
 //
@@ -70,6 +71,8 @@ CDEXMaterials::CDEXMaterials()
 {
     lightYieldAntracene = 20000 / MeV; //Anthracene
     pathString = "../data";
+    fArYieldRatio = 1;
+    fArAbsLength = 60 * cm;
     //fTPB = nullptr;
 }
 
@@ -79,9 +82,8 @@ CDEXMaterials::~CDEXMaterials()
 }
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void CDEXMaterials::Construct()
-{
+{   
     G4NistManager *nistManager = G4NistManager::Instance();
-
     // ------------------------------------------------------------------------
     // Elements
     // ------------------------------------------------------------------------
@@ -1449,6 +1451,7 @@ void CDEXMaterials::RegisterArgonOpticalProperties()
      * Nominal values for pure argon
      */
     G4double scint_yield = 23.6 * eV; // Nominal energy to produce a photon (measured)
+    G4double yield_factor = fArYieldRatio;
     G4double photon_yield = 1.0 * MeV / scint_yield;
     G4double tau_s = 6.0 * ns;
     G4double tau_l = 1590.0 * ns;
@@ -1497,6 +1500,9 @@ void CDEXMaterials::RegisterArgonOpticalProperties()
     //LAr_ABSL_xuv *= LAr_att_scale;
 
     //MGLog(debugging) << "Rayleigh scattering lenght [m]:" << endlog;
+    //std::ofstream output;
+    //output.open("LAr.txt", std::ios::ate);
+
     for (ji = 0; ji < NUMENTRIES; ji++)
     {
         e = PPCKOVLowE + ((G4double)ji) * de;
@@ -1505,6 +1511,7 @@ void CDEXMaterials::RegisterArgonOpticalProperties()
         //G4double b= LArRayLength((LambdaE / e), temp);
         //G4double T = temp;
         LAr_RAYL[ji] = LArRayLength((LambdaE / e), temp);
+        //output<<(LambdaE / e) / nm<< '\t'<<LArRayLength((LambdaE / e), temp)/cm<<G4endl;
         //MGLog(debugging) << (LambdaE / LAr_PPCK[ji]) / nm << ", " << LAr_RAYL[ji] << endlog;
         /* Uncomment for debugging purposes
         MGLog(debugging) << " WL: " << (LambdaE/LAr_PPCK[ji])/nm<< " nm Energy: " << LAr_PPCK[ji]/eV << " eV; Refr: " <<
@@ -1520,6 +1527,7 @@ void CDEXMaterials::RegisterArgonOpticalProperties()
             LAr_ABSL[ji] = LAr_ABSL_vis;
         }
     }
+    //output.close();
     //MGLog(debugging) << "XUV attenuation length: " << LAr_ABSL_xuv / cm << " cm" << endlog;
     //MGLog(debugging) << "VIS attenuation length: " << LAr_ABSL_vis / m << " m" << endlog;
 
@@ -1602,10 +1610,9 @@ void CDEXMaterials::RegisterArgonOpticalProperties()
 
     G4double fano = 0.11; // Doke et al, NIM 134 (1976)353
     myMPT1->AddConstProperty("RESOLUTIONSCALE", fano);
-    //G4NistManager* nistManager = G4NistManager::Instance();
-    //G4Material* matLAr = nistManager->FindOrBuildMaterial("G4_lAr");
+    G4NistManager* nistManager = G4NistManager::Instance();
     G4Material *matLAr = G4Material::GetMaterial("G4_lAr");
-
+    fArMPT = myMPT1;
     matLAr->SetMaterialPropertiesTable(myMPT1);
     matLAr->GetIonisation()->SetBirksConstant(5.1748e-4 * cm / MeV);
 }
@@ -2166,6 +2173,7 @@ void CDEXMaterials::Register_Copper_Properties()
     //  cuOptTable->DumpTable();
     G4NistManager *nistManager = G4NistManager::Instance();
     fCopperEF = G4Material::GetMaterial("G4_Cu");
+    //fCopperEF=nistManager->FindOrBuildMaterial("G4_Cu");
     //fCopperEF = G4Material::GetMaterial("Copper-EF", true);
     fCopperEF->SetMaterialPropertiesTable(cuOptTable);
     //MGLog(debugging) << "Constructed Copper-EF Optical Properties" << endlog;
@@ -2327,7 +2335,8 @@ void CDEXMaterials::Register_Silicon_Properties()
 
     siOptTable->AddProperty("RINDEX", nrgIndexRealSi, RIndexSi, NpointsReal);
     siOptTable->AddProperty("ABSLENGTH", nrgIndexRealSi, absLengthSi, NpointsReal);
-
+    G4NistManager* nistManager = G4NistManager::Instance();
+    //G4Material* silicon = nistManager->FindOrBuildMaterial("G4_Si");
     G4Material *silicon = G4Material::GetMaterial("G4_Si");
     silicon->SetMaterialPropertiesTable(siOptTable);
 }
@@ -2369,6 +2378,8 @@ void CDEXMaterials::Register_Teflon_Properties()
         IndexEnergy[nIndex - i - 1] = LambdaE / (IndexWavelength[i] * nm);
     tefOptTable->AddProperty("REFLECTIVITY", PhotonEnergy, ReflectivityTef, tefRefl->GetN());
     tefOptTable->AddProperty("RINDEX", IndexEnergy, IndexRefraction, nIndex);
+    G4NistManager* nistManager = G4NistManager::Instance();
+    //G4Material* teflon = nistManager->FindOrBuildMaterial("G4_TEFLON");
     G4Material *teflon = G4Material::GetMaterial("G4_TEFLON");
     teflon->SetMaterialPropertiesTable(tefOptTable);
 }
@@ -2484,7 +2495,9 @@ void CDEXMaterials::Register_StainlessSteel()
 
     ssOptTable->AddProperty("RINDEX", nrgIndexRealSi, RIndexSi, NpointsReal);
     ssOptTable->AddProperty("ABSLENGTH", nrgIndexRealSi, absLengthSi, NpointsReal);
-
+    
+    G4NistManager* nistManager = G4NistManager::Instance();
+    //G4Material* ssteel = nistManager->FindOrBuildMaterial("G4_STAINLESS-STEEL");
     G4Material *ssteel = G4Material::GetMaterial("G4_STAINLESS-STEEL");
     ssteel->SetMaterialPropertiesTable(ssOptTable);
 }

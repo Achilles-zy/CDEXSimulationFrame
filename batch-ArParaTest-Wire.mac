@@ -1,0 +1,160 @@
+#Radioactive decay simulation
+/control/verbose 0
+/control/saveHistory
+/run/verbose 0
+#
+# Change the default number of threads (in multi-threaded mode)
+/run/numberOfThreads 60
+#
+
+/CDEX/sim/set/mode CDEXArParametersTest
+/CDEX/src/type Wire
+
+# Initialize kernel
+/run/initialize
+
+#Tl208
+/gps/particle ion
+/gps/ion 81 208 0 0
+/gps/energy 0 keV
+
+#########################
+/CDEX/cons/set/arabsyieldratio 1
+
+/CDEX/cons/set/arabslength 200 cm
+/run/beamOn 1000000
+/CDEX/cons/set/arabslength 150 cm
+/run/beamOn 1000000
+/CDEX/cons/set/arabslength 100 cm
+/run/beamOn 1000000
+/CDEX/cons/set/arabslength 60 cm
+/run/beamOn 1000000
+/CDEX/cons/set/arabslength 30 cm
+/run/beamOn 1000000
+/CDEX/cons/set/arabslength 10 cm
+/run/beamOn 1000000
+#########################
+
+#########################
+/CDEX/cons/set/arabsyieldratio 0.5
+
+/CDEX/cons/set/arabslength 200 cm
+/run/beamOn 1000000
+/CDEX/cons/set/arabslength 150 cm
+/run/beamOn 1000000
+/CDEX/cons/set/arabslength 100 cm
+/run/beamOn 1000000
+/CDEX/cons/set/arabslength 60 cm
+/run/beamOn 1000000
+/CDEX/cons/set/arabslength 30 cm
+/run/beamOn 1000000
+/CDEX/cons/set/arabslength 10 cm
+/run/beamOn 1000000
+#########################
+
+#########################
+/CDEX/cons/set/arabsyieldratio 0.2
+
+/CDEX/cons/set/arabslength 200 cm
+/run/beamOn 1000000
+/CDEX/cons/set/arabslength 150 cm
+/run/beamOn 1000000
+/CDEX/cons/set/arabslength 100 cm
+/run/beamOn 1000000
+/CDEX/cons/set/arabslength 60 cm
+/run/beamOn 1000000
+/CDEX/cons/set/arabslength 30 cm
+/run/beamOn 1000000
+/CDEX/cons/set/arabslength 10 cm
+/run/beamOn 1000000
+#########################
+
+#########################
+/CDEX/cons/set/arabsyieldratio 0.1
+
+/CDEX/cons/set/arabslength 200 cm
+/run/beamOn 1000000
+/CDEX/cons/set/arabslength 150 cm
+/run/beamOn 1000000
+/CDEX/cons/set/arabslength 100 cm
+/run/beamOn 1000000
+/CDEX/cons/set/arabslength 60 cm
+/run/beamOn 1000000
+/CDEX/cons/set/arabslength 30 cm
+/run/beamOn 1000000
+/CDEX/cons/set/arabslength 10 cm
+/run/beamOn 1000000
+#########################
+
+#Ac228
+/gps/particle ion
+/gps/ion 89 228 0 0
+/gps/energy 0 keV
+
+#########################
+/CDEX/cons/set/arabsyieldratio 1
+
+/CDEX/cons/set/arabslength 200 cm
+/run/beamOn 1000000
+/CDEX/cons/set/arabslength 150 cm
+/run/beamOn 1000000
+/CDEX/cons/set/arabslength 100 cm
+/run/beamOn 1000000
+/CDEX/cons/set/arabslength 60 cm
+/run/beamOn 1000000
+/CDEX/cons/set/arabslength 30 cm
+/run/beamOn 1000000
+/CDEX/cons/set/arabslength 10 cm
+/run/beamOn 1000000
+#########################
+
+#########################
+/CDEX/cons/set/arabsyieldratio 0.5
+
+/CDEX/cons/set/arabslength 200 cm
+/run/beamOn 1000000
+/CDEX/cons/set/arabslength 150 cm
+/run/beamOn 1000000
+/CDEX/cons/set/arabslength 100 cm
+/run/beamOn 1000000
+/CDEX/cons/set/arabslength 60 cm
+/run/beamOn 1000000
+/CDEX/cons/set/arabslength 30 cm
+/run/beamOn 1000000
+/CDEX/cons/set/arabslength 10 cm
+/run/beamOn 1000000
+#########################
+
+#########################
+/CDEX/cons/set/arabsyieldratio 0.2
+
+/CDEX/cons/set/arabslength 200 cm
+/run/beamOn 1000000
+/CDEX/cons/set/arabslength 150 cm
+/run/beamOn 1000000
+/CDEX/cons/set/arabslength 100 cm
+/run/beamOn 1000000
+/CDEX/cons/set/arabslength 60 cm
+/run/beamOn 1000000
+/CDEX/cons/set/arabslength 30 cm
+/run/beamOn 1000000
+/CDEX/cons/set/arabslength 10 cm
+/run/beamOn 1000000
+#########################
+
+#########################
+/CDEX/cons/set/arabsyieldratio 0.1
+
+/CDEX/cons/set/arabslength 200 cm
+/run/beamOn 1000000
+/CDEX/cons/set/arabslength 150 cm
+/run/beamOn 1000000
+/CDEX/cons/set/arabslength 100 cm
+/run/beamOn 1000000
+/CDEX/cons/set/arabslength 60 cm
+/run/beamOn 1000000
+/CDEX/cons/set/arabslength 30 cm
+/run/beamOn 1000000
+/CDEX/cons/set/arabslength 10 cm
+/run/beamOn 1000000
+#########################

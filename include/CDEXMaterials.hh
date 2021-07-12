@@ -4,7 +4,6 @@
  * @date 2020, Max Planck Institute for Physics
  */
 
-
 #ifndef CDEXMaterials_H
 #define CDEXMaterials_H
 
@@ -15,18 +14,19 @@
 #include "TGraph.h"
 #include "TFile.h"
 
-class CDEXMaterials {
+class CDEXMaterials
+{
 public:
   CDEXMaterials();
   ~CDEXMaterials();
-  
+
   void Construct();
   void ConstructionOpticalProperties();
   void RegisterArgonOpticalProperties();
+
   G4double LArRefIndex(const G4double lambda);
   G4double LArEpsilon(const G4double lambda);
-  G4double LArRayLength(const G4double lambda, const
-      G4double temp);
+  G4double LArRayLength(const G4double lambda, const G4double temp);
   G4double ArScintillationSpectrum(const G4double kk);
   //inline G4Material* Get_ArgonLiquid() { return fArgonLiquid; }
 
@@ -61,27 +61,29 @@ public:
   void Register_Silica_Properties();
   void Register_VM2000();
   void Register_StainlessSteel();
-  
+
 private:
   G4double lightYieldAntracene;
   static const G4double LambdaE;
   //const G4double LambdaE = twopi * 1.973269602e-16 * m * GeV;;
+  G4MaterialPropertiesTable *fArMPT;
+  G4Material *fArgonLiquid;
+  G4Material *fTPB;
+  G4Material *fFiber_material;
+  G4Material *fFiber_claddingInner_material;
+  G4Material *fFiber_claddingOuter_material;
+  G4Material *fNylon;
+  G4Material *fCopperEF;
 
-  G4Material* fArgonLiquid;
-  G4Material* fTPB;
-  G4Material* fFiber_material;
-  G4Material* fFiber_claddingInner_material;
-  G4Material* fFiber_claddingOuter_material;
-  G4Material* fNylon;
-  G4Material* fCopperEF;
+  G4double fArYieldRatio;
+  G4double fArAbsLength;
 
   G4bool fSuccessfulInitialization;
-  TGraph* fTPBspec;
-  TGraph* fFibersAbsorptionSpec;
-  TGraph* fFibersEmissionSpec;
+  TGraph *fTPBspec;
+  TGraph *fFibersAbsorptionSpec;
+  TGraph *fFibersEmissionSpec;
 
   G4String pathString;
-    
 };
 
 #endif

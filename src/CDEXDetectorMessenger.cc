@@ -27,7 +27,9 @@ CDEXDetectorMessenger::CDEXDetectorMessenger(CDEXDetectorConstruction* Det)
 	fDetDir(0),
 	fMatDir(0),
 	cmdSetPENPropertiesID(0),
-	cmdCuShieldThickness(0)
+	cmdCuShieldThickness(0),
+	cmdSetArAbsLength(0),
+	cmdSetArYieldRatio(0)
 {
 	fDetDir = new G4UIdirectory("/CDEX/cons/set/");
 	fDetDir->SetGuidance("Set construction parameters");
@@ -37,7 +39,6 @@ CDEXDetectorMessenger::CDEXDetectorMessenger(CDEXDetectorConstruction* Det)
 
 	fMatDir = new G4UIdirectory("/CDEX/mat/set/");
 	fMatDir->SetGuidance("Set material parameters");
-
 
 	cmdSetMode = new G4UIcmdWithAString("/CDEX/sim/set/mode", this);
 	cmdSetMode->SetGuidance("Select simulation mode.");
@@ -57,6 +58,19 @@ CDEXDetectorMessenger::CDEXDetectorMessenger(CDEXDetectorConstruction* Det)
 	cmdCuShieldThickness->AvailableForStates(G4State_PreInit, G4State_Idle);
 	cmdCuShieldThickness->SetToBeBroadcasted(false);
 	cmdCuShieldThickness->SetUnitCategory("Length");
+
+	cmdSetArAbsLength = new G4UIcmdWithADoubleAndUnit("/CDEX/cons/set/arabslength", this);
+	cmdSetArAbsLength->SetGuidance("Set Ar Absorption Length");
+	cmdSetArAbsLength->SetParameterName("ArAbsLength", false);
+	cmdSetArAbsLength->AvailableForStates(G4State_PreInit, G4State_Idle);
+	cmdSetArAbsLength->SetToBeBroadcasted(false);
+	cmdSetArAbsLength->SetUnitCategory("Length");
+
+	cmdSetArYieldRatio = new G4UIcmdWithADouble("/CDEX/cons/set/arabsyieldratio", this);
+	cmdSetArYieldRatio->SetGuidance("Set Ar Yield Ratio");
+	cmdSetArYieldRatio->SetParameterName("ArYieldRatio", false);
+	cmdSetArYieldRatio->AvailableForStates(G4State_PreInit, G4State_Idle);
+	cmdSetArYieldRatio->SetToBeBroadcasted(false);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -68,6 +82,8 @@ CDEXDetectorMessenger::~CDEXDetectorMessenger()
 	delete fMatDir;
 	delete cmdSetPENPropertiesID;
 	delete cmdCuShieldThickness;
+	delete cmdSetArYieldRatio;
+	delete cmdSetArAbsLength;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -85,5 +101,13 @@ void CDEXDetectorMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
 
 	if (command==cmdCuShieldThickness){
 		fDetCons->SetCuShieldThickness(cmdCuShieldThickness->GetNewDoubleValue(newValue));
+	}
+
+	if (command==cmdSetArAbsLength){
+		fDetCons->SetArAbsLength(cmdSetArAbsLength->GetNewDoubleValue(newValue));
+	}
+
+	if (command==cmdSetArYieldRatio){
+		fDetCons->SetArYieldRatio(cmdSetArYieldRatio->GetNewDoubleValue(newValue));
 	}
 }

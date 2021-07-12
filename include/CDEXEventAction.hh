@@ -65,6 +65,10 @@ private:
   G4double EnergyThreshold;
 
   G4int SiPMVetoThreshold;
+  G4int SiPMVetoThreshold1;
+  G4int SiPMVetoThreshold2;
+  G4int SiPMVetoThreshold3;
+  G4int SiPMVetoThreshold4;
   G4bool ifBulk;
   G4bool ifROI;
   G4bool ifSiPM;

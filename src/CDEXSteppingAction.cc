@@ -19,6 +19,12 @@
 #include "G4SystemOfUnits.hh"
 #include "g4root.hh"
 
+#ifdef G4MULTITHREADED
+#include "G4MTRunManager.hh"
+#else
+#include "G4RunManager.hh"
+#endif
+
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 CDEXSteppingAction::CDEXSteppingAction(
@@ -80,9 +86,10 @@ void CDEXSteppingAction::UserSteppingAction(const G4Step *aStep)
 				CDEXEvent->RecordEdepInfoInScintillator(ParticleType, CreatorProcessType, PostStepPos.getX(), PostStepPos.getY(), PostStepPos.getZ(), DeltaE);
 			}
 		}
+		
 	}
 
-	if (CDEXCons->GetMode() == "CDEXFiberBucketSetup"||CDEXCons->GetMode() == "CDEXLightGuideBucketSetup")
+	if (CDEXCons->GetMode() == "CDEXFiberBucketSetup" || CDEXCons->GetMode() == "CDEXLightGuideBucketSetup" || CDEXCons->GetMode() == "CDEXArParametersTest")
 	{
 
 		//G4cout << "EnableAcc: " << CDEXRun->GetAccelerate() << G4endl;
@@ -102,7 +109,7 @@ void CDEXSteppingAction::UserSteppingAction(const G4Step *aStep)
 		auto ParticleName = aStep->GetTrack()->GetParticleDefinition()->GetParticleName();
 		auto edep = aStep->GetTotalEnergyDeposit();
 		auto KineticE = aStep->GetPreStepPoint()->GetKineticEnergy();
-		
+
 		auto DeltaE = aStep->GetPreStepPoint()->GetKineticEnergy() - aStep->GetPostStepPoint()->GetKineticEnergy();
 		CDEXTrack->AddEdepTrack(edep);
 		G4int ParticleType = GetParticleIntType(ParticleName);
@@ -115,7 +122,7 @@ void CDEXSteppingAction::UserSteppingAction(const G4Step *aStep)
 		{
 			G4int DetID = touchable->GetCopyNumber(2);
 			CDEXEvent->AddBulkEnergy(edep);
-			CDEXEvent->AddBulkEnergyDet(edep,DetID);
+			CDEXEvent->AddBulkEnergyDet(edep, DetID);
 		}
 
 		if (volume && logicvolume == detectorConstruction->GetArgonVolume(Mode) && edep > 1 * eV && ParticleType != 0)
@@ -123,15 +130,18 @@ void CDEXSteppingAction::UserSteppingAction(const G4Step *aStep)
 			CDEXEvent->DetectableTrue();
 		}
 
-		//For Acceleraiton
-		#ifdef ACCTRUE
-		G4int SiPMSignalCnt=CDEXEvent->GetSiPMSignalCnt();
-		G4int SignalSiPMCount=CDEXEvent->GetSignalSiPMCount();
+		// G4cout<<Mode<<G4endl;
+		// G4cout<<detectorConstruction->GetArgonVolume("2")->GetName()<<G4endl;
+//For Acceleraiton
+#ifdef ACCTRUE
+		G4int SiPMSignalCnt = CDEXEvent->GetSiPMSignalCnt();
+		G4int SignalSiPMCount = CDEXEvent->GetSignalSiPMCount();
 		//if (SiPMSignalCnt>1&&ParticleName=="opticalphoton"){
-		if (SignalSiPMCount>=1&&ParticleName=="opticalphoton"){			
+		if (SignalSiPMCount >= 2 && ParticleName == "opticalphoton")
+		{
 			aStep->GetTrack()->SetTrackStatus(fStopAndKill);
 		}
-		#endif
+#endif
 
 		if (ParticleName == "opticalphoton" && logicvolume != nullptr)
 		{
@@ -158,7 +168,7 @@ void CDEXSteppingAction::UserSteppingAction(const G4Step *aStep)
 				if (rnd < SiPMEff)
 				{
 					CDEXEvent->CountSiPMSignal();
-					CDEXEvent->CountSignalSiPM(SiPMType,SiPMID);
+					CDEXEvent->CountSignalSiPM(SiPMType, SiPMID);
 				}
 				aStep->GetTrack()->SetTrackStatus(fStopAndKill);
 			}
@@ -181,9 +191,42 @@ void CDEXSteppingAction::UserSteppingAction(const G4Step *aStep)
 				if (rnd < SiPMEff)
 				{
 					CDEXEvent->CountSiPMSignal();
-					CDEXEvent->CountSignalSiPM(SiPMType,SiPMID);
+					CDEXEvent->CountSignalSiPM(SiPMType, SiPMID);
 				}
 				aStep->GetTrack()->SetTrackStatus(fStopAndKill);
+			}
+		}
+	}
+
+	if (CDEXCons->GetMode() == "CDEXArExpSetup" )
+	{
+		//G4cout << "EnableAcc: " << CDEXRun->GetAccelerate() << G4endl;
+		G4String Mode = CDEXCons->GetMode();
+
+		auto analysisManager = G4AnalysisManager::Instance();
+		auto volume = aStep->GetPostStepPoint()->GetTouchableHandle()->GetVolume();
+		G4LogicalVolume *logicvolume = nullptr;
+		if (volume)
+		{
+			logicvolume = volume->GetLogicalVolume();
+		}
+
+		auto touchable = aStep->GetPostStepPoint()->GetTouchableHandle();
+		auto ParticleName = aStep->GetTrack()->GetParticleDefinition()->GetParticleName();
+
+		const CDEXDetectorConstruction *detectorConstruction = static_cast<const CDEXDetectorConstruction *>(G4RunManager::GetRunManager()->GetUserDetectorConstruction());
+		if (ParticleName == "opticalphoton" && logicvolume != nullptr)
+		{
+			G4int SiPMType = 0;
+			G4int SiPMID;
+			G4int EvtID = CDEXEvent->GetEventID();
+			if (logicvolume == detectorConstruction->GetImaginaryPMT())
+			{
+				
+				SiPMID = touchable->GetCopyNumber(0);
+				//G4cout<<"True"<<G4endl;
+				//G4cout<<SiPMID<<G4endl;
+				CDEXRun->CountImaginaryPMTPhoton(SiPMID);
 			}
 		}
 	}

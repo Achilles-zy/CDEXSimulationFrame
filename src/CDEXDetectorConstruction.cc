@@ -105,11 +105,13 @@ CDEXDetectorConstruction::CDEXDetectorConstruction() : G4VUserDetectorConstructi
 													   logicArVolumeSiPM(nullptr),
 													   logicArVolume(nullptr),
 													   logicArContainer(nullptr),
+													   logicImaginaryPMT(nullptr),
 													   LambdaE(twopi * 1.973269602e-16 * m * GeV)
 {
 	fDetectorMessenger = new CDEXDetectorMessenger(this);
 	matconstructor = new CDEXMaterials;
 	MPT_PEN = new G4MaterialPropertiesTable();
+	MPT_Ar = new G4MaterialPropertiesTable();
 	AbsorptionLength = 1.5; //value at 400 nm
 	fRES = 1.0;
 	fLY = 3500. / MeV;
@@ -117,8 +119,8 @@ CDEXDetectorConstruction::CDEXDetectorConstruction() : G4VUserDetectorConstructi
 	fConfine = "PENShell";
 	fWireType = "A1";
 	fReflectorType = "PolisherESR_LUT";
-	//fReflectorType = "PolisherESR_LUT";
-	fMode = "CDEXLightGuideBucketSetup";
+	//fMode = "CDEX300";
+	fMode = "CDEXArExpSetup";
 	fWirePos = G4ThreeVector();
 	fWireRadius = 0.7 * mm;
 	fWireLength = 4 * cm;
@@ -164,6 +166,9 @@ CDEXDetectorConstruction::CDEXDetectorConstruction() : G4VUserDetectorConstructi
 	fLightGuideInnerRadius = 29.5 * cm;
 
 	fShellThickness = 5 * mm;
+
+	fArYieldRatio = 1;
+	fArAbsLength = 60 * cm;
 
 	fCuShieldThickness = 5 * cm;
 	G4cout << "Start Construction" << G4endl;
@@ -308,6 +313,54 @@ void CDEXDetectorConstruction::SetCuShieldThickness(G4double thickness)
 	G4RunManager::GetRunManager()->ReinitializeGeometry();
 }
 
+void CDEXDetectorConstruction::SetArYieldRatio(G4double yieldratio)
+{
+	fArYieldRatio = yieldratio;
+	G4double scint_yield = 23.6 * eV; // Nominal energy to produce a photon (measured)
+	G4double yield_factor = fArYieldRatio;
+	G4double photon_yield = 1.0 * MeV / scint_yield;
+	matLAr->GetMaterialPropertiesTable()->AddConstProperty("SCINTILLATIONYIELD", photon_yield * yield_factor);
+}
+
+void CDEXDetectorConstruction::SetArAbsLength(G4double abslength)
+{
+	fArAbsLength = abslength;
+
+	const G4int NUMENTRIES = 69;
+	G4int ji;
+	G4double e;
+
+	G4double PPCKOVHighE = LambdaE / (115 * nanometer);
+	G4double PPCKOVLowE = LambdaE / (650 * nanometer);
+	G4double de = ((PPCKOVHighE - PPCKOVLowE) / ((G4double)(NUMENTRIES - 1)));
+
+	// liquid argon (LAr)
+	G4double LAr_PPCK[(NUMENTRIES)] = {0};
+	G4double LAr_ABSL[(NUMENTRIES)] = {0};
+
+	//G4double LAr_ABSL_xuv = 60 * cm;
+	G4double LAr_ABSL_xuv = fArAbsLength;
+	//G4double LAr_ABSL_xuv = 110*cm;
+	G4double LAr_ABSL_vis = 1000 * m;
+
+	for (ji = 0; ji < NUMENTRIES; ji++)
+	{
+		e = PPCKOVLowE + ((G4double)ji) * de;
+		LAr_PPCK[ji] = e;
+
+		if (((LambdaE / e) / nm) < 200.0)
+		{
+			LAr_ABSL[ji] = LAr_ABSL_xuv;
+		}
+		else
+		{
+			LAr_ABSL[ji] = LAr_ABSL_vis;
+		}
+	}
+
+	matLAr->GetMaterialPropertiesTable()->AddProperty("ABSLENGTH", LAr_PPCK, LAr_ABSL, NUMENTRIES);
+}
+
 void CDEXDetectorConstruction::DefineMat()
 {
 	matconstructor->Construct();
@@ -342,7 +395,6 @@ void CDEXDetectorConstruction::DefineMat()
 	matFiber = G4Material::GetMaterial("PolystyreneFiber");
 	matSS = G4Material::GetMaterial("G4_STAINLESS-STEEL");
 	matFluorAcrylic = G4Material::GetMaterial("Fluor-acrylic");
-
 	G4cout << " materials ok " << G4endl;
 
 	G4double wavelength;
@@ -720,6 +772,7 @@ G4VPhysicalVolume *CDEXDetectorConstruction::Construct()
 		fLY = 6000. / MeV;
 		absFactor = 6.44;
 	}
+
 	SetABS(absFactor);
 	SetLY(fLY);
 
@@ -757,6 +810,14 @@ G4VPhysicalVolume *CDEXDetectorConstruction::Construct()
 	{
 		//physWorld=ConstructFiberTestSetup();
 		return ConstructBucketLightGuideSystem();
+	}
+	else if (fMode == "CDEXArParametersTest")
+	{
+		return ConstructBucketLightGuideSystem();
+	}
+	else if (fMode == "CDEXArExpSetup")
+	{
+		return ConstructArExpSetup();
 	}
 	else
 	{
@@ -1993,8 +2054,8 @@ G4LogicalVolume *CDEXDetectorConstruction::ConstructArVolumeHexSiPM(G4double cir
 
 	G4TwoVector offsetA(0, 0), offsetB(0, 0);
 	G4double scaleA = 1, scaleB = 1;
-	G4VSolid *solidCoatedSiPM = new G4ExtrudedSolid("solidCoatedSiPM", Polygon,  SiPMThickness / 2 + TPBThickness, offsetA, scaleA, offsetB, scaleB);
-	G4VSolid *solidSiPMChip = new G4ExtrudedSolid("solidCoatedSiPM", Polygon,  SiPMThickness / 2, offsetA, scaleA, offsetB, scaleB);
+	G4VSolid *solidCoatedSiPM = new G4ExtrudedSolid("solidCoatedSiPM", Polygon, SiPMThickness / 2 + TPBThickness, offsetA, scaleA, offsetB, scaleB);
+	G4VSolid *solidSiPMChip = new G4ExtrudedSolid("solidCoatedSiPM", Polygon, SiPMThickness / 2, offsetA, scaleA, offsetB, scaleB);
 	G4LogicalVolume *logicCoatedArVolumeSiPM = new G4LogicalVolume(solidCoatedSiPM, matTPB, "logicCoatedArVolumeSiPM");
 	logicArVolumeSiPM = new G4LogicalVolume(solidSiPMChip, matSi, "logicArVolumeSiPM");
 	physArVolumeSiPM = new G4PVPlacement(0, G4ThreeVector(0, 0, 0), logicArVolumeSiPM, "physArVolumeSiPM", logicCoatedArVolumeSiPM, false, 0, CheckOverlaps);
@@ -2151,7 +2212,7 @@ G4LogicalVolume *CDEXDetectorConstruction::ConstructCDEX300Bucket(G4double shiel
 	auto solidArVolume = new G4Tubs("solidArVolume", 0, BucketRadius - 2 * SSWallThickness - VacuumThickness - CuShieldThickness, BucketHeight / 2, 0, twopi);
 	logicArVolume = new G4LogicalVolume(solidArVolume, matLAr, "logicArVolume");
 	//logicBucketFiberCrystal = new G4LogicalVolume(solidBucketCrystal, matLAr, "logicBucket");
-	auto physBucketCrystal = new G4PVPlacement(0, G4ThreeVector(), logicArVolume_CDEX300, "BucketCrystal", logicBucket, false, 0, CheckOverlaps);
+	auto physBucketCrystal = new G4PVPlacement(0, G4ThreeVector(), logicArVolume, "BucketCrystal", logicBucket, false, 0, CheckOverlaps);
 	auto physCuShield = new G4PVPlacement(0, G4ThreeVector(), logicCuShield, "CuShield", logicBucket, false, 0, CheckOverlaps);
 	auto physVacuumLayer = new G4PVPlacement(0, G4ThreeVector(), logicVacuumLayer, "VacuumLayer", logicBucket, false, 0, CheckOverlaps);
 	auto physSSOuterWall = new G4PVPlacement(0, G4ThreeVector(), logicSSOuterWall, "Wall", logicBucket, false, 0, CheckOverlaps);
@@ -2462,7 +2523,7 @@ G4LogicalVolume *CDEXDetectorConstruction::ConstructRecLightGuide(G4double lengt
 	return logicLightGuide;
 }
 
-G4LogicalVolume *CDEXDetectorConstruction::ConstructHexLightGuide(G4double length,G4double circumradius, G4Material *Coremat)
+G4LogicalVolume *CDEXDetectorConstruction::ConstructHexLightGuide(G4double length, G4double circumradius, G4Material *Coremat)
 {
 	G4LogicalVolume *logicLightGuide;
 	G4LogicalVolume *logicLightGuideInnerTPB;
@@ -2488,23 +2549,23 @@ G4LogicalVolume *CDEXDetectorConstruction::ConstructHexLightGuide(G4double lengt
 		G4double cosphi = std::cos(phi);
 		G4double sinphi = std::sin(phi);
 		Polygon0[i].set(circumradius * cosphi, circumradius * sinphi);
-		Polygon1[i].set((circumradius-LightGuideTPBCoatingThickness/std::sqrt(3)*2) * cosphi,(circumradius-LightGuideTPBCoatingThickness/std::sqrt(3)*2) * sinphi);
-		Polygon2[i].set((circumradius-(LightGuideTPBCoatingThickness+LightGuideReflectorThickness)/std::sqrt(3)*2) * cosphi,(circumradius-(LightGuideTPBCoatingThickness+LightGuideReflectorThickness)/std::sqrt(3)*2) * sinphi);
-		Polygon3[i].set((circumradius-(2*LightGuideTPBCoatingThickness+LightGuideReflectorThickness)/std::sqrt(3)*2) * cosphi,(circumradius-(2*LightGuideTPBCoatingThickness+LightGuideReflectorThickness)/std::sqrt(3)*2) * sinphi);
+		Polygon1[i].set((circumradius - LightGuideTPBCoatingThickness / std::sqrt(3) * 2) * cosphi, (circumradius - LightGuideTPBCoatingThickness / std::sqrt(3) * 2) * sinphi);
+		Polygon2[i].set((circumradius - (LightGuideTPBCoatingThickness + LightGuideReflectorThickness) / std::sqrt(3) * 2) * cosphi, (circumradius - (LightGuideTPBCoatingThickness + LightGuideReflectorThickness) / std::sqrt(3) * 2) * sinphi);
+		Polygon3[i].set((circumradius - (2 * LightGuideTPBCoatingThickness + LightGuideReflectorThickness) / std::sqrt(3) * 2) * cosphi, (circumradius - (2 * LightGuideTPBCoatingThickness + LightGuideReflectorThickness) / std::sqrt(3) * 2) * sinphi);
 	}
 
 	G4TwoVector offsetA(0, 0), offsetB(0, 0);
 	G4double scaleA = 1, scaleB = 1;
-	G4VSolid *Extruded0 = new G4ExtrudedSolid("Extruded0", Polygon0, length/2, offsetA, scaleA, offsetB, scaleB);
-	G4VSolid *Extruded1 = new G4ExtrudedSolid("Extruded1", Polygon1, length/2, offsetA, scaleA, offsetB, scaleB);
-	G4VSolid *Extruded2 = new G4ExtrudedSolid("Extruded2", Polygon2, length/2, offsetA, scaleA, offsetB, scaleB);
-	G4VSolid *Extruded3 = new G4ExtrudedSolid("Extruded3", Polygon3, length/2, offsetA, scaleA, offsetB, scaleB);
-	
+	G4VSolid *Extruded0 = new G4ExtrudedSolid("Extruded0", Polygon0, length / 2, offsetA, scaleA, offsetB, scaleB);
+	G4VSolid *Extruded1 = new G4ExtrudedSolid("Extruded1", Polygon1, length / 2, offsetA, scaleA, offsetB, scaleB);
+	G4VSolid *Extruded2 = new G4ExtrudedSolid("Extruded2", Polygon2, length / 2, offsetA, scaleA, offsetB, scaleB);
+	G4VSolid *Extruded3 = new G4ExtrudedSolid("Extruded3", Polygon3, length / 2, offsetA, scaleA, offsetB, scaleB);
+
 	auto solidLightGuide = new G4SubtractionSolid("solidLightGuide", Extruded0, Extruded3);
 	auto solidLightGuideOuterTPB = new G4SubtractionSolid("solidLightGuide", Extruded0, Extruded1);
 	auto solidLightGuideReflector = new G4SubtractionSolid("solidLightGuide", Extruded1, Extruded2);
 	auto solidLightGuideInnerTPB = new G4SubtractionSolid("solidLightGuide", Extruded2, Extruded3);
-	
+
 	logicLightGuide = new G4LogicalVolume(solidLightGuide, Coremat, "logicLightGuide");
 	G4OpticalSurface *LightGuide_Surf = new G4OpticalSurface("LightGuideSurf", glisur, polished, dielectric_dielectric);
 	G4LogicalSkinSurface *LightGuide_Surf_LSS = new G4LogicalSkinSurface("LightGuide_Surf_LSS", logicLightGuide, LightGuide_Surf);
@@ -4099,12 +4160,12 @@ G4VPhysicalVolume *CDEXDetectorConstruction::ConstructCDEX300()
 	{
 		G4ThreeVector PosUnit1 = G4ThreeVector(0, 0, (SmallestUnitHeight / 2 + SmallestUnitHeight * i));
 		G4ThreeVector PosUnit2 = G4ThreeVector(0, 0, (-SmallestUnitHeight / 2 - SmallestUnitHeight * i));
-		physPackedBEGe[2 * i] = new G4PVPlacement(RotBEGe, PosUnit1 + PosBEGe, logicShell, "PackedBEGe", logicArVolume_CDEX300, false, 0, checkOverlaps);
-		physPackedBEGe[2 * i + 1] = new G4PVPlacement(RotBEGe, PosUnit2 + PosBEGe, logicShell, "PackedBEGe", logicArVolume_CDEX300, false, 0, checkOverlaps);
-		physWire[2 * i] = new G4PVPlacement(RotWire, PosUnit1 + PosWire, logicWire, "Wire", logicArVolume_CDEX300, false, 0, checkOverlaps);
-		physWire[2 * i + 1] = new G4PVPlacement(RotWire, PosUnit2 + PosWire, logicWire, "Wire", logicArVolume_CDEX300, false, 0, checkOverlaps);
-		physASIC[2 * i] = new G4PVPlacement(RotASIC, PosUnit1 + PosASIC, logicASICPlate, "ASIC", logicArVolume_CDEX300, false, 0, checkOverlaps);
-		physASIC[2 * i + 1] = new G4PVPlacement(RotASIC, PosUnit2 + PosASIC, logicASICPlate, "ASIC", logicArVolume_CDEX300, false, 0, checkOverlaps);
+		physPackedBEGe[2 * i] = new G4PVPlacement(RotBEGe, PosUnit1 + PosBEGe, logicShell, "PackedBEGe", logicArVolume, false, 0, checkOverlaps);
+		physPackedBEGe[2 * i + 1] = new G4PVPlacement(RotBEGe, PosUnit2 + PosBEGe, logicShell, "PackedBEGe", logicArVolume, false, 0, checkOverlaps);
+		physWire[2 * i] = new G4PVPlacement(RotWire, PosUnit1 + PosWire, logicWire, "Wire", logicArVolume, false, 0, checkOverlaps);
+		physWire[2 * i + 1] = new G4PVPlacement(RotWire, PosUnit2 + PosWire, logicWire, "Wire", logicArVolume, false, 0, checkOverlaps);
+		physASIC[2 * i] = new G4PVPlacement(RotASIC, PosUnit1 + PosASIC, logicASICPlate, "ASIC", logicArVolume, false, 0, checkOverlaps);
+		physASIC[2 * i + 1] = new G4PVPlacement(RotASIC, PosUnit2 + PosASIC, logicASICPlate, "ASIC", logicArVolume, false, 0, checkOverlaps);
 	}
 
 	//=============================================================//
@@ -4298,10 +4359,10 @@ G4VPhysicalVolume *CDEXDetectorConstruction::ConstructBucketLightGuideSystem()
 	//=============================================================//
 	//                         Light Guide                         //
 	//=============================================================//
-	G4double LightGuideRadius=fLightGuideRadius;
-	G4double LightGuideLength=fLightGuideLength;
-	//auto logicLightGuide = ConstructLightGuide(LightGuideLength,LightGuideRadius, matLAr);
-	auto logicLightGuide = ConstructHexLightGuide(LightGuideLength,LightGuideRadius*1.1, matLAr);
+	G4double LightGuideRadius = fLightGuideRadius;
+	G4double LightGuideLength = fLightGuideLength;
+	auto logicLightGuide = ConstructLightGuide(LightGuideLength, LightGuideRadius, matLAr);
+	//auto logicLightGuide = ConstructHexLightGuide(LightGuideLength, LightGuideRadius * 0.5, matLAr);
 	//=============================================================//
 	//                           String                            //
 	//=============================================================//
@@ -4335,18 +4396,27 @@ G4VPhysicalVolume *CDEXDetectorConstruction::ConstructBucketLightGuideSystem()
 		physASIC[2 * i + 1] = new G4PVPlacement(RotASIC, PosUnit2 + PosASIC, logicASICPlate, "ASIC", logicArVolume, false, 2 * i + 1, checkOverlaps);
 	}
 
-	G4PVPlacement *physArVolumeSiPMSet[2] = {nullptr};
-	auto logicArVolumeSiPMChip = ConstructArVolumeHexSiPM(LightGuideRadius*1.1);
+	G4PVPlacement *physArVolumeSiPMSet[14] = {nullptr};
+	auto logicArVolumeSiPMChip = ConstructArVolumeSiPM(LightGuideRadius);
+	//auto logicArVolumeSiPMChip = ConstructArVolumeHexSiPM(LightGuideRadius * 0.5);
 	physArVolumeSiPMSet[0] = new G4PVPlacement(0, G4ThreeVector(0, 0, fFiberLength / 2 + 3 * mm), logicArVolumeSiPMChip, "ArVolumeSiPM", logicArVolume, false, 0, checkOverlaps);
 	physArVolumeSiPMSet[1] = new G4PVPlacement(0, G4ThreeVector(0, 0, -fFiberLength / 2 - 3 * mm), logicArVolumeSiPMChip, "ArVolumeSiPM", logicArVolume, false, 1, checkOverlaps);
-	// physArVolumeSiPMSet[2] = new G4PVPlacement(0, G4ThreeVector(15 * cm, 0, fFiberLength/2 + 3 * mm), logicArVolumeSiPMChip, "ArVolumeSiPM", logicArVolume, false, 0, checkOverlaps);
-	// physArVolumeSiPMSet[3] = new G4PVPlacement(0, G4ThreeVector(-15 * cm, 0, fFiberLength/2 + 3 * mm), logicArVolumeSiPMChip, "ArVolumeSiPM", logicArVolume, false, 0, checkOverlaps);
-	// physArVolumeSiPMSet[4] = new G4PVPlacement(0, G4ThreeVector(0, 15 * cm, -fFiberLength/2 - 3 * mm), logicArVolumeSiPMChip, "ArVolumeSiPM", logicArVolume, false, 0, checkOverlaps);
-	// physArVolumeSiPMSet[5] = new G4PVPlacement(0, G4ThreeVector(0, -15 * cm, -fFiberLength/2 - 3 * mm), logicArVolumeSiPMChip, "ArVolumeSiPM", logicArVolume, false, 0, checkOverlaps);
-	// physArVolumeSiPMSet[6] = new G4PVPlacement(0, G4ThreeVector(15 * cm, 0, -fFiberLength/2 - 3 * mm), logicArVolumeSiPMChip, "ArVolumeSiPM", logicArVolume, false, 0, checkOverlaps);
-	// physArVolumeSiPMSet[7] = new G4PVPlacement(0, G4ThreeVector(-15 * cm, 0, -fFiberLength/2 - 3 * mm), logicArVolumeSiPMChip, "ArVolumeSiPM", logicArVolume, false, 0, checkOverlaps);
+	// for (G4int i = 0; i < 6; i++)
+	// {
+	// 	G4double PosAngle = i * 60 * degree+90*degree;
+	// 	G4double PosDist = std::sqrt(3) * LightGuideRadius * 0.5;
+	// 	physArVolumeSiPMSet[2*i+2] = new G4PVPlacement(0, G4ThreeVector(PosDist * cos(PosAngle), PosDist * sin(PosAngle), fFiberLength / 2 + 3 * mm), logicArVolumeSiPMChip, "ArVolumeSiPM", logicArVolume, false, 2*i+2, checkOverlaps);
+	// 	physArVolumeSiPMSet[2*i+3] = new G4PVPlacement(0, G4ThreeVector(PosDist * cos(PosAngle), PosDist * sin(PosAngle), -fFiberLength / 2 - 3 * mm), logicArVolumeSiPMChip, "ArVolumeSiPM", logicArVolume, false, 2*i+3, checkOverlaps);
+	// }
 
 	auto physLightGuide = new G4PVPlacement(0, G4ThreeVector(), logicLightGuide, "LightGuide", logicArVolume, false, 0, checkOverlaps);
+	G4PVPlacement *physArLightGuideSet[6] = {nullptr};
+	// for (G4int i = 0; i < 6; i++)
+	// {
+	// 	G4double PosAngle = i * 60 * degree+90*degree;
+	// 	G4double PosDist = std::sqrt(3) * LightGuideRadius * 0.5;
+	// 	physArLightGuideSet[i] = new G4PVPlacement(0, G4ThreeVector(PosDist * cos(PosAngle), PosDist * sin(PosAngle), 0), logicLightGuide, "LightGuide", logicArVolume, false, 0, checkOverlaps);
+	// }
 
 	//=============================================================//
 	//                        Optical Surfaces                     //
@@ -4457,6 +4527,77 @@ G4VPhysicalVolume *CDEXDetectorConstruction::ConstructBucketLightGuideSystem()
 	G4LogicalSkinSurface *Shell_LSS = new G4LogicalSkinSurface("Shell_LSS", logicBEGe, PMMA_Dielectric);
 
 	GetPhysicalVolumeProperties();
+
+	return physWorld;
+}
+
+G4VPhysicalVolume *CDEXDetectorConstruction::ConstructArExpSetup()
+{
+
+	G4NistManager *nist = G4NistManager::Instance();
+	G4bool checkOverlaps = true;
+
+	//=============================================================//
+	//                        World&Envelope                       //
+	//=============================================================//
+
+	G4Material *world_mat = matLN2;
+	G4Material *env_mat = matLAr;
+	G4Material *det_mat = matEnGe;
+
+	G4double world_size = 600 * cm;
+	G4double env_size = 500 * cm;
+	G4Box *solidWorld = new G4Box("solidWorld", 0.5 * world_size, 0.5 * world_size, 0.5 * world_size);
+	G4LogicalVolume *logicWorld = new G4LogicalVolume(solidWorld, world_mat, "logicWorld");
+	G4VPhysicalVolume *physWorld =
+		new G4PVPlacement(0,			   //no rotation
+						  G4ThreeVector(), //at (0,0,0)
+						  logicWorld,	   //its logical volume
+						  "World",		   //its name
+						  0,			   //its mother  volume
+						  false,		   //no boolean operation
+						  0,			   //copy number
+						  checkOverlaps);  //overlaps checking
+
+	G4Box *solidEnv = new G4Box("solidEnvelope", 0.5 * env_size, 0.5 * env_size, 0.5 * env_size);
+	G4LogicalVolume *logicEnv = new G4LogicalVolume(solidEnv, env_mat, "logicEnvelope");
+	physEnv = new G4PVPlacement(0, G4ThreeVector(), logicEnv, "Envelope", logicWorld, false, 0, checkOverlaps);
+
+	auto solidArExpContainer = new G4Tubs("solidArExpContainer", 0 * cm, 41 * cm, 3 * m, 0, twopi);
+	auto logicArExpContainer = new G4LogicalVolume(solidArExpContainer, matSS, "logicArExpContainer");
+
+	auto solidArVolume = new G4Tubs("solidArVolume", 0 * cm, 40 * cm, 3 * m, 0, twopi);
+	logicArVolume = new G4LogicalVolume(solidArVolume, matLAr, "logicEnvelope");
+	auto physArVolume = new G4PVPlacement(0, G4ThreeVector(), logicArVolume, "ArVolume", logicArExpContainer, false, 0, checkOverlaps);
+
+	auto solidImaginaryPMT = new G4Tubs("solidImaginaryPMT", 0 * cm, 20 * cm, 1 * mm, 0, twopi);
+	logicImaginaryPMT = new G4LogicalVolume(solidImaginaryPMT, matLAr, "logicImaginaryPMT");
+
+	auto physArExpContainer = new G4PVPlacement(0, G4ThreeVector(), logicArExpContainer, "ArExpContainer", logicEnv, false, 0, checkOverlaps);
+
+	G4PVPlacement *physImaginaryPMT[40] = {nullptr};
+	for (G4int i = 0; i < 20; i++)
+	{
+		physImaginaryPMT[2 * i] = new G4PVPlacement(0, G4ThreeVector(0, 0, 10 * cm * i + 10 * cm), logicImaginaryPMT, "ImaginaryPMT", logicArVolume, false, i, checkOverlaps);
+		physImaginaryPMT[2 * i + 1] = new G4PVPlacement(0, G4ThreeVector(0, 0, -10 * cm * i - 10 * cm), logicImaginaryPMT, "ImaginaryPMT", logicArVolume, false, i, checkOverlaps);
+	}
+
+	const G4int NUMENTRIES_Surf = 4;
+	G4double Wavelength[NUMENTRIES_Surf] = {100., 200., 301., 650.};
+	G4double RefPhotonEnergy[NUMENTRIES_Surf];
+	G4double RefReflectivity[NUMENTRIES_Surf];
+
+	for (G4int ji = 0; ji < NUMENTRIES_Surf; ji++)
+	{
+		RefPhotonEnergy[ji] = LambdaE / (Wavelength[(NUMENTRIES_Surf - 1) - ji] * nm);
+		RefReflectivity[ji] = 0;
+	}
+	G4MaterialPropertiesTable *PerfectAbs_Surf_MPT = new G4MaterialPropertiesTable();
+	PerfectAbs_Surf_MPT->AddProperty("REFLECTIVITY", RefPhotonEnergy, RefReflectivity, NUMENTRIES_Surf);
+	G4OpticalSurface *PerfectAbs_Surf = new G4OpticalSurface("PerfectAbs_Surf", unified, polished, dielectric_metal);
+	PerfectAbs_Surf->SetMaterialPropertiesTable(PerfectAbs_Surf_MPT);
+	G4LogicalBorderSurface *SSContainer_Surf_LBS1 = new G4LogicalBorderSurface("SSContainer_Surf_LBS", physArVolume, physArExpContainer, PerfectAbs_Surf);
+	G4LogicalBorderSurface *SSContainer_Surf_LBS2 = new G4LogicalBorderSurface("SSContainer_Surf_LBS", physArExpContainer, physArVolume, PerfectAbs_Surf);
 
 	return physWorld;
 }

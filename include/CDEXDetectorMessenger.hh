@@ -36,6 +36,8 @@ private:
     G4UIcmdWithAString* cmdSetMode;
     G4UIcmdWithAnInteger* cmdSetPENPropertiesID;
     G4UIcmdWithADoubleAndUnit* cmdCuShieldThickness;
+    G4UIcmdWithADoubleAndUnit* cmdSetArAbsLength;
+    G4UIcmdWithADouble* cmdSetArYieldRatio;
 
 };
 
