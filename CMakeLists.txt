@@ -62,8 +62,6 @@ set(CDEXSimulationFrame_SCRIPTS
   batch-SSWall.mac
   batch-ArVolume.mac
   batch-Wire.mac
-  batch-LightYield.mac
-  batch-AbsLength.mac
   batch-ArExpAbs.mac
   batch-ArParaTest-Wire.mac
   src1.mac
