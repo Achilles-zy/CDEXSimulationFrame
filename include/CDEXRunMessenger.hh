@@ -28,6 +28,7 @@ public:
 private:
     CDEXRunAction* fAction;
     G4UIdirectory* fSrcDir;
+    G4UIcmdWithABool* cmdSetRefresh;
 
 
 };

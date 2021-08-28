@@ -109,7 +109,7 @@ CDEXDetectorConstruction::CDEXDetectorConstruction() : G4VUserDetectorConstructi
 													   LambdaE(twopi * 1.973269602e-16 * m * GeV)
 {
 	fDetectorMessenger = new CDEXDetectorMessenger(this);
-	matconstructor = new CDEXMaterials;
+	matconstructor = new CDEXMaterials();
 	MPT_PEN = new G4MaterialPropertiesTable();
 	MPT_Ar = new G4MaterialPropertiesTable();
 	AbsorptionLength = 1.5; //value at 400 nm
@@ -120,7 +120,19 @@ CDEXDetectorConstruction::CDEXDetectorConstruction() : G4VUserDetectorConstructi
 	fWireType = "A1";
 	fReflectorType = "PolisherESR_LUT";
 	//fMode = "CDEX300";
-	fMode = "CDEXArExpSetup";
+	fMode = "CDEXArParametersTest";
+
+	// Unit
+	// SArUnit
+	// Array-1
+	// CDEXSiPMBucketSetup
+	// CDEXFiberBucketSetup
+	// FiberTest
+	// CDEX300
+	// CDEXLightGuideBucketSetup
+	// CDEXArParametersTest
+	// CDEXArExpSetup
+
 	fWirePos = G4ThreeVector();
 	fWireRadius = 0.7 * mm;
 	fWireLength = 4 * cm;
@@ -388,6 +400,7 @@ void CDEXDetectorConstruction::DefineMat()
 	matLN2 = G4Material::GetMaterial("G4_lN2");
 	matGN2 = G4Material::GetMaterial("G4_N");
 	matLAr = G4Material::GetMaterial("G4_lAr");
+	//matLAr = G4Material::GetMaterial("LAr");
 	matGAGG = G4Material::GetMaterial("GAGG");
 	matPTFE = G4Material::GetMaterial("PTFE");
 	matNylon = G4Material::GetMaterial("Nylon");
@@ -689,9 +702,34 @@ void CDEXDetectorConstruction::DefineMat()
 	MPT_PMMA->AddProperty("ABSLENGTH", energyPMMA, absPMMA, nEntries3)->SetSpline(true);
 	MPT_PMMA->AddProperty("REFLECTIVITY", energyPMMA, reflPMMA, nEntries3)->SetSpline(true);
 	matPMMA->SetMaterialPropertiesTable(MPT_PMMA);
+
+	
+    G4int ji;
+    G4double e;
+    G4double ee;
+	G4int NUMENTRIES = 69;
+    G4double PPCKOVHighE = LambdaE / (115 * nanometer);
+    G4double PPCKOVLowE = LambdaE / (650 * nanometer);
+    G4double de = ((PPCKOVHighE - PPCKOVLowE) / ((G4double)(NUMENTRIES - 1)));
+
+    // liquid argon (LAr)
+    G4double LAr_PPCK[(NUMENTRIES)] = {0};
+    G4double LAr_RAYL[(NUMENTRIES)] = {0};
+
+    for (ji = 0; ji < NUMENTRIES; ji++)
+    {
+        e = PPCKOVLowE + ((G4double)ji) * de;
+        LAr_PPCK[ji] = e;
+        //G4double b= LArRayLength((LambdaE / e), temp);
+        //G4double T = temp;
+        LAr_RAYL[ji] = 66*cm;
+    }
+
+	//matLAr->GetMaterialPropertiesTable()->AddProperty("RAYLEIGH", LAr_PPCK, LAr_RAYL, NUMENTRIES);
+
 }
 
-void CDEXDetectorConstruction::SetABS(G4double value)
+void CDEXDetectorConstruction::SetPENABS(G4double value)
 {
 	AbsorptionLength = value;
 	//read file and add the value given by the user
@@ -731,50 +769,67 @@ void CDEXDetectorConstruction::SetABS(G4double value)
 
 	const G4int nEntries1 = sizeof(wlPhotonEnergy) / sizeof(G4double);
 	assert(sizeof(ABSORPTION_PEN) == sizeof(wlPhotonEnergy));
-	MPT_PEN->AddProperty("ABSLENGTH", wlPhotonEnergy, ABSORPTION_PEN, nEntries1)->SetSpline(true); // *
-																								   //G4RunManager::GetRunManager()->PhysicsHasBeenModified();
-#ifdef G4MULTITHREADED
-	G4MTRunManager::GetRunManager()->PhysicsHasBeenModified();
-#else
-	G4RunManager::GetRunManager()->PhysicsHasBeenModified();
-#endif
+	matPEN->GetMaterialPropertiesTable()->AddProperty("ABSLENGTH", wlPhotonEnergy, ABSORPTION_PEN, nEntries1)->SetSpline(true);
+// 	MPT_PEN->AddProperty("ABSLENGTH", wlPhotonEnergy, ABSORPTION_PEN, nEntries1)->SetSpline(true); // *
+// 																								   //G4RunManager::GetRunManager()->PhysicsHasBeenModified();
+// #ifdef G4MULTITHREADED
+// 	G4MTRunManager::GetRunManager()->PhysicsHasBeenModified();
+// #else
+// 	G4RunManager::GetRunManager()->PhysicsHasBeenModified();
+// #endif
 }
 
-void CDEXDetectorConstruction::SetLY(G4double ly)
+void CDEXDetectorConstruction::SetPENLY(G4double ly)
 {
+	matPEN->GetMaterialPropertiesTable()->AddConstProperty("SCINTILLATIONYIELD", ly);
+// 	MPT_PEN->AddConstProperty("SCINTILLATIONYIELD", ly); // * 2.5 * PEN = PS, 10*PEN=PS
+// //G4RunManager::GetRunManager()->PhysicsHasBeenModified();
+// #ifdef G4MULTITHREADED
+// 	G4MTRunManager::GetRunManager()->PhysicsHasBeenModified();
+// #else
+// 	G4RunManager::GetRunManager()->PhysicsHasBeenModified();
+// #endif
+}
 
-	MPT_PEN->AddConstProperty("SCINTILLATIONYIELD", ly); // * 2.5 * PEN = PS, 10*PEN=PS
-//G4RunManager::GetRunManager()->PhysicsHasBeenModified();
+void CDEXDetectorConstruction::SetLightGuideRadius(G4double r)
+{
+	fLightGuideRadius = r;
+	G4RunManager::GetRunManager()->ReinitializeGeometry();
+}
+
+void CDEXDetectorConstruction::SetLightGuideLength(G4double l)
+{
+	fLightGuideLength = l;
+	G4RunManager::GetRunManager()->ReinitializeGeometry();
 #ifdef G4MULTITHREADED
 	G4MTRunManager::GetRunManager()->PhysicsHasBeenModified();
 #else
 	G4RunManager::GetRunManager()->PhysicsHasBeenModified();
 #endif
 }
-
 ////////
 //
 ////////
 G4VPhysicalVolume *CDEXDetectorConstruction::Construct()
 {
-	if (fPENPropertiesID == 0)
-	{
-		fLY = 6000. / MeV;
-		absFactor = 1.5;
-	}
-	else if (fPENPropertiesID == 1)
-	{
-		fLY = 3500. / MeV;
-		absFactor = 2.58;
-	}
-	else if (fPENPropertiesID == 2)
-	{
-		fLY = 6000. / MeV;
-		absFactor = 6.44;
-	}
+	// if (fPENPropertiesID == 0)
+	// {
+	// 	fLY = 6000. / MeV;
+	// 	absFactor = 1.5;
+	// }
+	// else if (fPENPropertiesID == 1)
+	// {
+	// 	fLY = 3500. / MeV;
+	// 	absFactor = 2.58;
+	// }
+	// else if (fPENPropertiesID == 2)
+	// {
+	// 	fLY = 6000. / MeV;
+	// 	absFactor = 6.44;
+	// }
 
-	SetABS(absFactor);
-	SetLY(fLY);
+	// //SetABS(absFactor);
+	// //SetLY(fLY);
 
 	if (fMode == "Unit")
 	{

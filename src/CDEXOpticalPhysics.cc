@@ -28,6 +28,12 @@
 #include "G4IonConstructor.hh"
 #include "G4ShortLivedConstructor.hh"
 
+#include "G4Gamma.hh"
+#include "G4Electron.hh"
+#include "G4Alpha.hh"
+#include "G4GenericIon.hh"
+#include "G4OpticalPhoton.hh"
+
 G4ThreadLocal G4int CDEXOpticalPhysics::fVerboseLevel = 0;
 G4ThreadLocal G4int CDEXOpticalPhysics::fMaxNumPhotonStep = 20;
 G4ThreadLocal G4Cerenkov *CDEXOpticalPhysics::fCerenkovProcess = 0;
@@ -42,8 +48,8 @@ CDEXOpticalPhysics::CDEXOpticalPhysics() : G4VPhysicsConstructor()
 {
     // mandatory for G4NuclideTable
     OpVerbLevel = 0;
-    G4NuclideTable::GetInstance()->SetThresholdOfHalfLife(0.1 * picosecond);
-    G4NuclideTable::GetInstance()->SetLevelTolerance(1.0 * eV);
+    //G4NuclideTable::GetInstance()->SetThresholdOfHalfLife(0.1 * picosecond);
+    //G4NuclideTable::GetInstance()->SetLevelTolerance(1.0 * eV);
     std::cout << "INFO: Construct the Optical Physics !" << std::endl;
 }
 
@@ -93,7 +99,7 @@ void CDEXOpticalPhysics::ConstructProcess()
     fCerenkovProcess->SetVerboseLevel(fVerboseLevel);
     fScintillationProcess->SetVerboseLevel(OpVerbLevel);
     fAbsorptionProcess->SetVerboseLevel(OpVerbLevel);
-    fRayleighScatteringProcess->SetVerboseLevel(fVerboseLevel);
+    fRayleighScatteringProcess->SetVerboseLevel(OpVerbLevel);
     fMieHGScatteringProcess->SetVerboseLevel(fVerboseLevel);
     fBoundaryProcess->SetVerboseLevel(fVerboseLevel);
 
@@ -155,18 +161,26 @@ void CDEXOpticalPhysics::ConstructProcess()
 
 void CDEXOpticalPhysics::ConstructParticle()
 {
-    G4BosonConstructor bConstructor;
-    bConstructor.ConstructParticle();
 
-    G4LeptonConstructor lConstructor;
-    lConstructor.ConstructParticle();
+    G4Gamma::Definition();
+    G4Electron::Definition();
+    G4Alpha::Definition();
+    G4OpticalPhoton::Definition();
+    G4GenericIon::Definition();
 
-    G4MesonConstructor mConstructor;
-    mConstructor.ConstructParticle();
+    // G4BosonConstructor bConstructor;
+    // bConstructor.ConstructParticle();
 
-    G4BaryonConstructor rConstructor;
-    rConstructor.ConstructParticle();
+    // G4LeptonConstructor lConstructor;
+    // lConstructor.ConstructParticle();
 
-    G4IonConstructor iConstructor;
-    iConstructor.ConstructParticle();
+    // G4MesonConstructor mConstructor;
+    // mConstructor.ConstructParticle();
+
+    // G4BaryonConstructor rConstructor;
+    // rConstructor.ConstructParticle();
+
+    // G4IonConstructor iConstructor;
+    // iConstructor.ConstructParticle();
+    
 }

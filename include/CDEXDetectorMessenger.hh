@@ -38,7 +38,8 @@ private:
     G4UIcmdWithADoubleAndUnit* cmdCuShieldThickness;
     G4UIcmdWithADoubleAndUnit* cmdSetArAbsLength;
     G4UIcmdWithADouble* cmdSetArYieldRatio;
-
+    G4UIcmdWithADoubleAndUnit* cmdSetLightGuideRadius;
+    G4UIcmdWithADoubleAndUnit* cmdSetLightGuideLength;
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

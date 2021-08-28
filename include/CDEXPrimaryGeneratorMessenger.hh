@@ -29,6 +29,7 @@ private:
   G4UIdirectory *fSrcDir;
 
   G4UIcmdWithAString *cmdSetSrcType;
+  G4UIcmdWithoutParameter* cmdResetGPS;
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

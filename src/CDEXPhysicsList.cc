@@ -426,6 +426,7 @@ void CDEXPhysicsList::SetCuts()
 #include "CDEXPhysicsList.hh"
 #include "CDEXTritiumPhysics.hh"
 #include "CDEXOpticalPhysics.hh"
+#include "G4OpticalPhysics.hh"
 
 // guide for different physics lists
 // http://geant4-userdoc.web.cern.ch/geant4-userdoc/UsersGuides/ForApplicationDeveloper/html/TrackingAndPhysics/physicsProcess.html
@@ -446,19 +447,20 @@ CDEXPhysicsList::CDEXPhysicsList() : G4VModularPhysicsList()
     // Stopping and ion physics
     RegisterPhysics(new G4StoppingPhysics());
     RegisterPhysics(new G4IonPhysics());
-    // Radio active decay physics and add user defined data base
-    auto radioactiveDecayContainer = new G4RadioactiveDecay();
-    G4int Z = 1;
-    G4int A = 3;
-    G4String file_name = "../data/Z1.A3";
-    // const char* nv = (const char*)file_name;
-    radioactiveDecayContainer->AddUserDecayDataFile(Z, A, file_name);
+    // // Radio active decay physics and add user defined data base
+    // auto radioactiveDecayContainer = new G4RadioactiveDecay();
+    // G4int Z = 1;
+    // G4int A = 3;
+    // G4String file_name = "../data/Z1.A3";
+    // // const char* nv = (const char*)file_name;
+    // radioactiveDecayContainer->AddUserDecayDataFile(Z, A, file_name);
     RegisterPhysics(new G4RadioactiveDecayPhysics());
 
 
     //Customized Physics
     RegisterPhysics(new CDEXTritiumPhysics());
     RegisterPhysics(new CDEXOpticalPhysics());
+    //RegisterPhysics(new G4OpticalPhysics());
 
     // Add biasing to physical list
     G4GenericBiasingPhysics* biasingPhysics = new G4GenericBiasingPhysics();

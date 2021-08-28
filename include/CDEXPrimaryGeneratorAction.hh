@@ -4,6 +4,7 @@
 #include "G4VUserPrimaryGeneratorAction.hh"
 #include "CDEXDetectorConstruction.hh"
 #include "CDEXPrimaryGeneratorMessenger.hh"
+#include "G4GeneralParticleSource.hh"
 
 class G4GeneralParticleSource;
 class G4Event;
@@ -60,6 +61,10 @@ public:
     void SetWavelength(G4double wavelength)
     {
         fWavelength = wavelength;
+    }
+
+    void ResetGPS(){
+        fCDEXGPS->ClearAll();
     }
 
     G4String GetSrcType()

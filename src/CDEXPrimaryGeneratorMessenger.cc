@@ -24,7 +24,8 @@ CDEXPrimaryGeneratorMessenger::CDEXPrimaryGeneratorMessenger(CDEXPrimaryGenerato
     : G4UImessenger(),
       fAction(Gun),
       fSrcDir(0),
-      cmdSetSrcType(0)
+      cmdSetSrcType(0),
+      cmdResetGPS(0)
 {
   fSrcDir = new G4UIdirectory("/CDEX/src/");
   fSrcDir->SetGuidance("PrimaryGenerator control");
@@ -34,6 +35,10 @@ CDEXPrimaryGeneratorMessenger::CDEXPrimaryGeneratorMessenger(CDEXPrimaryGenerato
   cmdSetSrcType->SetParameterName("SrcType", true);
   cmdSetSrcType->SetDefaultValue("Default");
   cmdSetSrcType->AvailableForStates(G4State_PreInit, G4State_Idle);
+
+  cmdResetGPS = new G4UIcmdWithoutParameter("/CDEX/src/reset", this);
+  cmdResetGPS->SetGuidance("Choose the type of source");
+  cmdResetGPS->AvailableForStates(G4State_PreInit, G4State_Idle);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -51,6 +56,10 @@ void CDEXPrimaryGeneratorMessenger::SetNewValue(G4UIcommand *command, G4String n
   if (command == cmdSetSrcType)
   {
     fAction->SetSrcType(newValue);
+  }
+  if (command == cmdResetGPS)
+  {
+    fAction->ResetGPS();
   }
 }
 

@@ -1495,7 +1495,8 @@ void CDEXMaterials::RegisterArgonOpticalProperties()
 
     G4double LAr_ABSL_xuv = 60 * cm;
     //G4double LAr_ABSL_xuv = 110*cm;
-    G4double LAr_ABSL_vis = 1000 * m;
+    //G4double LAr_ABSL_vis = 1000 * m;//LEGEND
+    G4double LAr_ABSL_vis = 50 * m;
     //TODO
     //LAr_ABSL_xuv *= LAr_att_scale;
 
@@ -1611,6 +1612,7 @@ void CDEXMaterials::RegisterArgonOpticalProperties()
     G4double fano = 0.11; // Doke et al, NIM 134 (1976)353
     myMPT1->AddConstProperty("RESOLUTIONSCALE", fano);
     G4NistManager* nistManager = G4NistManager::Instance();
+    //G4Material *matLAr = new G4Material("LAr",54.,131.29*g/mole,3.020*g/cm3);
     G4Material *matLAr = G4Material::GetMaterial("G4_lAr");
     fArMPT = myMPT1;
     matLAr->SetMaterialPropertiesTable(myMPT1);
@@ -1776,6 +1778,7 @@ void CDEXMaterials::Register_TPB_Properties()
         {                                    // <= 374.57 nm
                                              // For the moment set it to always absorb photons
             WLS_absorption[ji] = 0.001 * nm; //absorbs UV (always)
+            //WLS_absorption[ji] = 100 * nm;
         }
         else
         {

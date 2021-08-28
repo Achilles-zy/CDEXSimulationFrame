@@ -215,6 +215,8 @@ void CDEXSteppingAction::UserSteppingAction(const G4Step *aStep)
 		auto ParticleName = aStep->GetTrack()->GetParticleDefinition()->GetParticleName();
 
 		const CDEXDetectorConstruction *detectorConstruction = static_cast<const CDEXDetectorConstruction *>(G4RunManager::GetRunManager()->GetUserDetectorConstruction());
+
+		
 		if (ParticleName == "opticalphoton" && logicvolume != nullptr)
 		{
 			G4int SiPMType = 0;

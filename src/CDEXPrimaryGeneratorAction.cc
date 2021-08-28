@@ -16,7 +16,7 @@ CDEXPrimaryGeneratorAction::CDEXPrimaryGeneratorAction(CDEXDetectorConstruction 
 																						fPrimaryE(0),
 																						fInitialE(1 * keV),
 																						fPrimaryName(""),
-																						fSrcType("Wire")
+																						fSrcType("Default")
 {
 	fCDEXGPS = new G4GeneralParticleSource();
 	fPrimaryMessenger = new CDEXPrimaryGeneratorMessenger(this);
@@ -49,7 +49,6 @@ CDEXPrimaryGeneratorAction::~CDEXPrimaryGeneratorAction()
 
 void CDEXPrimaryGeneratorAction::GeneratePrimaries(G4Event *anEvent)
 {
-
 	G4ParticleTable *particleTable = G4ParticleTable::GetParticleTable();
 	//G4String particleName = "e-";
 	//G4double particleEnergy = 0 * MeV;
@@ -140,6 +139,7 @@ void CDEXPrimaryGeneratorAction::GeneratePrimaries(G4Event *anEvent)
 			G4double BucketHeight = fDetCons->GetBucketHeight();
 			G4double BucketThickness = fDetCons->GetBucketThickness();
 			G4double BucketRadius = fDetCons->GetBucketOuterRadius();
+			G4double LGRadius = fDetCons->GetLightGuideRadius();
 
 			if (G4RunManager::GetRunManager()->GetRunManagerType() == 1)
 			{
@@ -154,6 +154,14 @@ void CDEXPrimaryGeneratorAction::GeneratePrimaries(G4Event *anEvent)
 			fCDEXGPS->GetCurrentSource()->GetPosDist()->SetPosDisType("Volume");
 			fCDEXGPS->GetCurrentSource()->GetPosDist()->SetPosDisShape("Cylinder");
 			//fCDEXGPS->GetCurrentSource()->GetPosDist()->SetRadius(BucketRadius * 1.1);
+			// if (mode == "CDEXArParametersTest")
+			// {
+			// 	fCDEXGPS->GetCurrentSource()->GetPosDist()->SetRadius(LGRadius);
+			// }
+			// else
+			// {
+			// 	fCDEXGPS->GetCurrentSource()->GetPosDist()->SetRadius(BucketRadius);
+			// }
 			fCDEXGPS->GetCurrentSource()->GetPosDist()->SetRadius(BucketRadius);
 			fCDEXGPS->GetCurrentSource()->GetPosDist()->SetHalfZ(BucketHeight / 2);
 			fCDEXGPS->GetCurrentSource()->GetPosDist()->ConfineSourceToVolume("ArVolume");
@@ -239,8 +247,10 @@ void CDEXPrimaryGeneratorAction::GeneratePrimaries(G4Event *anEvent)
 		}
 	}
 
-	if (mode == "CDEXArExpSetup"){
-		if (fSrcType == "Point"){
+	if (mode == "CDEXArExpSetup")
+	{
+		if (fSrcType == "Point")
+		{
 			//fCDEXGPS->GetCurrentSource()->SetParticleDefinition(particleTable->FindParticle("opticalphoton"));
 			//fCDEXGPS->GetCurrentSource()->SetParticlePolarization(G4ThreeVector(1,1,1));
 			fCDEXGPS->GetCurrentSource()->GetEneDist()->SetEnergyDisType("Mono");
@@ -260,7 +270,6 @@ void CDEXPrimaryGeneratorAction::GeneratePrimaries(G4Event *anEvent)
 		}
 	}
 	fCDEXGPS->GeneratePrimaryVertex(anEvent);
-
 	if (anEvent->GetEventID() == 0)
 	{
 		fPrimaryE = fCDEXGPS->GetCurrentSource()->GetParticleEnergy();

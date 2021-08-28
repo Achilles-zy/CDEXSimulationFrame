@@ -79,7 +79,7 @@ CDEXRunAction::CDEXRunAction(CDEXPrimaryGeneratorAction *gen, CDEXDetectorConstr
 	fPrimaryGenerator = gen;
 	filename = "Simulation Result";
 	txtname = "Simulation Result";
-
+	ifRefresh = false;
 	if (fDetCons->GetMode() == "CDEX300")
 	{
 		analysisManager->CreateNtuple("RunSum", "Run Summary");
@@ -212,8 +212,8 @@ void CDEXRunAction::BeginOfRunAction(const G4Run *aRun)
 	{
 		//filename = fDetCons->GetMode() + "_" + fPrimaryGenerator->GetSrcType() + "_Abs_" + std::to_string(G4int (fDetCons->GetArAbsLength() / cm)) + "_LYRatio_" + std::to_string(G4int( fDetCons->GetArYieldRatio() * 10));
 		//txtname = fDetCons->GetMode() + "_Abs_" + std::to_string(G4int (fDetCons->GetArAbsLength() / cm)) + "_LYRatio_" + std::to_string(G4int(fDetCons->GetArYieldRatio() * 10));
-		filename = fDetCons->GetMode() + "_" + fPrimaryGenerator->GetSrcType() + "_Abs_" + std::to_string(G4int(fDetCons->GetArAbsLength() / cm)) + "_LYRatio_" + std::to_string(G4int(fDetCons->GetArYieldRatio() * 10));
-		txtname = fDetCons->GetMode() + "_" + fPrimaryGenerator->GetSrcType();
+		filename = fDetCons->GetMode() + "_" + fPrimaryGenerator->GetSrcType() + "_Abs_" + std::to_string(G4int(fDetCons->GetArAbsLength() / cm)) + "_LYRatio_" + std::to_string(G4int(fDetCons->GetArYieldRatio() * 10))+"_LGRadius_" + std::to_string(G4int(fDetCons->GetLightGuideRadius()/cm))+"_LGLength_" + std::to_string(G4int(fDetCons->GetLightGuideLength()/cm));
+		txtname = "Res_"+fDetCons->GetMode()+"_" + fPrimaryGenerator->GetSrcType();
 		analysisManager->OpenFile(filename);
 		accumulableManager->Reset();
 	}
@@ -353,6 +353,7 @@ void CDEXRunAction::EndOfRunAction(const G4Run *aRun)
 		G4cout << "ERROR! Mode does not exsist, nothing to output!" << G4endl;
 	}
 
+	ifRefresh = false;
 	G4cout << "Simulation End" << G4endl;
 }
 
@@ -566,12 +567,12 @@ void CDEXRunAction::CDEXArParametersTestOutput(const G4Run *aRun)
 		G4cout << "===============================================================" << G4endl;
 
 		std::ofstream output;
-		if (aRun->GetRunID() == 0)
+		//if (aRun->GetRunID() == 0)
+		if (GetRefresh() == true)
 		{
 			output.open(txtname + ".txt", std::ios::ate);
 			output
-				<< "Simulation Result" << G4endl
-				<< "Source Type: " << fPrimaryGenerator->GetSrcType() << G4endl;
+				<< "Simulation Result" << G4endl;
 		}
 		else
 		{
@@ -579,16 +580,20 @@ void CDEXRunAction::CDEXArParametersTestOutput(const G4Run *aRun)
 		}
 		G4double eff;
 
-		if (aRun->GetRunID() == 0)
+		//if (aRun->GetRunID() == 0)
+		if (GetRefresh() == true)
 		{
 			output
 				<< std::setw(10) << std::left << "Run ID" << '\t'
 				<< std::setw(40) << std::left << "Number of Event" << '\t'
+				<< std::setw(40) << std::left << "Source Type" << '\t'
 				<< std::setw(40) << std::left << "Primary Particle" << '\t'
 				<< std::setw(40) << std::left << "Primary Energy(MeV)" << '\t'
 				<< std::setw(40) << std::left << "Reflector Type" << '\t'
 				<< std::setw(40) << std::left << "Ar Abs Length(cm)" << '\t'
 				<< std::setw(40) << std::left << "Ar LY Ratio" << '\t'
+				<< std::setw(40) << std::left << "Light Guide Length" << '\t'
+				<< std::setw(40) << std::left << "Light Guide Radius" << '\t'
 				<< std::setw(40) << std::left << "DetectableEvent" << '\t'
 				<< std::setw(40) << std::left << "SiPMEvent" << '\t'
 				<< std::setw(40) << std::left << "BulkEvent" << '\t'
@@ -610,11 +615,14 @@ void CDEXRunAction::CDEXArParametersTestOutput(const G4Run *aRun)
 		output
 			<< std::setw(10) << std::left << aRun->GetRunID() << '\t'
 			<< std::setw(40) << std::left << aRun->GetNumberOfEvent() << '\t'
+			<< std::setw(40) << std::left << fPrimaryGenerator->GetSrcType() << '\t'
 			<< std::setw(40) << std::left << fPrimaryGenerator->GetPrimaryName() << '\t'
 			<< std::setw(40) << std::left << std::setiosflags(std::ios::fixed) << std::setprecision(2) << fPrimaryGenerator->GetPrimaryE() << '\t'
 			<< std::setw(40) << std::left << fDetCons->GetReflectorType() << '\t'
 			<< std::setw(40) << std::left << fDetCons->GetArAbsLength() / cm << '\t'
 			<< std::setw(40) << std::left << fDetCons->GetArYieldRatio() << '\t'
+			<< std::setw(40) << std::left << fDetCons->GetLightGuideLength() << '\t'
+			<< std::setw(40) << std::left << fDetCons->GetLightGuideRadius() << '\t'
 			<< std::setw(40) << std::left << DetectableEventCount.GetValue() << '\t'
 			<< std::setw(40) << std::left << SiPMEventCount.GetValue() << '\t'
 			<< std::setw(40) << std::left << BulkEventCount.GetValue() << '\t'
@@ -647,7 +655,7 @@ void CDEXRunAction::CDEXArExpOutput(const G4Run *aRun)
 		G4cout << G4endl;
 		G4cout << "Run" << aRun->GetRunID() << " Finished" << G4endl;
 		G4cout << "TotalEvent =" << aRun->GetNumberOfEvent() << G4endl;
-		G4cout << "AbsLength =" << fDetCons->GetArAbsLength()/cm << G4endl;
+		G4cout << "AbsLength =" << fDetCons->GetArAbsLength() / cm << G4endl;
 		G4cout << "LYRatio =" << fDetCons->GetArYieldRatio() << G4endl;
 		// for (G4int i = 0; i < 20; i++)
 		// {
@@ -709,26 +717,26 @@ void CDEXRunAction::CDEXArExpOutput(const G4Run *aRun)
 			<< std::setw(40) << std::left << std::setiosflags(std::ios::fixed) << std::setprecision(2) << fPrimaryGenerator->GetPrimaryE() << '\t'
 			<< std::setw(40) << std::left << fDetCons->GetArAbsLength() / cm << '\t'
 			<< std::setw(40) << std::left << fDetCons->GetArYieldRatio() << '\t'
-			<< std::setw(40) << std::left << ImaginaryPMTPhotonCount0.GetValue()/aRun->GetNumberOfEvent() << '\t'
-			<< std::setw(40) << std::left << ImaginaryPMTPhotonCount1.GetValue()/aRun->GetNumberOfEvent() << '\t'
-			<< std::setw(40) << std::left << ImaginaryPMTPhotonCount2.GetValue()/aRun->GetNumberOfEvent() << '\t'
-			<< std::setw(40) << std::left << ImaginaryPMTPhotonCount3.GetValue()/aRun->GetNumberOfEvent() << '\t'
-			<< std::setw(40) << std::left << ImaginaryPMTPhotonCount4.GetValue()/aRun->GetNumberOfEvent() << '\t'
-			<< std::setw(40) << std::left << ImaginaryPMTPhotonCount5.GetValue()/aRun->GetNumberOfEvent() << '\t'
-			<< std::setw(40) << std::left << ImaginaryPMTPhotonCount6.GetValue()/aRun->GetNumberOfEvent() << '\t'
-			<< std::setw(40) << std::left << ImaginaryPMTPhotonCount7.GetValue()/aRun->GetNumberOfEvent() << '\t'
-			<< std::setw(40) << std::left << ImaginaryPMTPhotonCount8.GetValue()/aRun->GetNumberOfEvent() << '\t'
-			<< std::setw(40) << std::left << ImaginaryPMTPhotonCount9.GetValue()/aRun->GetNumberOfEvent() << '\t'
-			<< std::setw(40) << std::left << ImaginaryPMTPhotonCount10.GetValue()/aRun->GetNumberOfEvent() << '\t'
-			<< std::setw(40) << std::left << ImaginaryPMTPhotonCount11.GetValue()/aRun->GetNumberOfEvent() << '\t'
-			<< std::setw(40) << std::left << ImaginaryPMTPhotonCount12.GetValue()/aRun->GetNumberOfEvent() << '\t'
-			<< std::setw(40) << std::left << ImaginaryPMTPhotonCount13.GetValue()/aRun->GetNumberOfEvent() << '\t'
-			<< std::setw(40) << std::left << ImaginaryPMTPhotonCount14.GetValue()/aRun->GetNumberOfEvent() << '\t'
-			<< std::setw(40) << std::left << ImaginaryPMTPhotonCount15.GetValue()/aRun->GetNumberOfEvent() << '\t'
-			<< std::setw(40) << std::left << ImaginaryPMTPhotonCount16.GetValue()/aRun->GetNumberOfEvent() << '\t'
-			<< std::setw(40) << std::left << ImaginaryPMTPhotonCount17.GetValue()/aRun->GetNumberOfEvent() << '\t'
-			<< std::setw(40) << std::left << ImaginaryPMTPhotonCount18.GetValue()/aRun->GetNumberOfEvent() << '\t'
-			<< std::setw(40) << std::left << ImaginaryPMTPhotonCount19.GetValue()/aRun->GetNumberOfEvent() << G4endl;
+			<< std::setw(40) << std::left << ImaginaryPMTPhotonCount0.GetValue() / aRun->GetNumberOfEvent() << '\t'
+			<< std::setw(40) << std::left << ImaginaryPMTPhotonCount1.GetValue() / aRun->GetNumberOfEvent() << '\t'
+			<< std::setw(40) << std::left << ImaginaryPMTPhotonCount2.GetValue() / aRun->GetNumberOfEvent() << '\t'
+			<< std::setw(40) << std::left << ImaginaryPMTPhotonCount3.GetValue() / aRun->GetNumberOfEvent() << '\t'
+			<< std::setw(40) << std::left << ImaginaryPMTPhotonCount4.GetValue() / aRun->GetNumberOfEvent() << '\t'
+			<< std::setw(40) << std::left << ImaginaryPMTPhotonCount5.GetValue() / aRun->GetNumberOfEvent() << '\t'
+			<< std::setw(40) << std::left << ImaginaryPMTPhotonCount6.GetValue() / aRun->GetNumberOfEvent() << '\t'
+			<< std::setw(40) << std::left << ImaginaryPMTPhotonCount7.GetValue() / aRun->GetNumberOfEvent() << '\t'
+			<< std::setw(40) << std::left << ImaginaryPMTPhotonCount8.GetValue() / aRun->GetNumberOfEvent() << '\t'
+			<< std::setw(40) << std::left << ImaginaryPMTPhotonCount9.GetValue() / aRun->GetNumberOfEvent() << '\t'
+			<< std::setw(40) << std::left << ImaginaryPMTPhotonCount10.GetValue() / aRun->GetNumberOfEvent() << '\t'
+			<< std::setw(40) << std::left << ImaginaryPMTPhotonCount11.GetValue() / aRun->GetNumberOfEvent() << '\t'
+			<< std::setw(40) << std::left << ImaginaryPMTPhotonCount12.GetValue() / aRun->GetNumberOfEvent() << '\t'
+			<< std::setw(40) << std::left << ImaginaryPMTPhotonCount13.GetValue() / aRun->GetNumberOfEvent() << '\t'
+			<< std::setw(40) << std::left << ImaginaryPMTPhotonCount14.GetValue() / aRun->GetNumberOfEvent() << '\t'
+			<< std::setw(40) << std::left << ImaginaryPMTPhotonCount15.GetValue() / aRun->GetNumberOfEvent() << '\t'
+			<< std::setw(40) << std::left << ImaginaryPMTPhotonCount16.GetValue() / aRun->GetNumberOfEvent() << '\t'
+			<< std::setw(40) << std::left << ImaginaryPMTPhotonCount17.GetValue() / aRun->GetNumberOfEvent() << '\t'
+			<< std::setw(40) << std::left << ImaginaryPMTPhotonCount18.GetValue() / aRun->GetNumberOfEvent() << '\t'
+			<< std::setw(40) << std::left << ImaginaryPMTPhotonCount19.GetValue() / aRun->GetNumberOfEvent() << G4endl;
 		output.close();
 		//std::DecimalFormat df1 = new DecimalFormat("0.0");
 	}

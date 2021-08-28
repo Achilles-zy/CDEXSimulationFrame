@@ -118,8 +118,8 @@ public:
 
     void DefineMat();
 
-    void SetABS(G4double);
-    void SetLY(G4double);
+    void SetPENABS(G4double);
+    void SetPENLY(G4double);
     void SetWireType(G4String);
     void SetReflectorType(G4String);
     void SetConfine(G4String);
@@ -129,6 +129,8 @@ public:
     void SetCuShieldThickness(G4double thickness);
     void SetOuterReflector(G4bool);
     void SetInnerReflector(G4bool);
+    void SetLightGuideRadius(G4double);
+    void SetLightGuideLength(G4double);
 
     //void SetLayerNbS(G4String);
     G4String GetMode()
@@ -262,8 +264,17 @@ public:
         return fArAbsLength;
     }
 
-    G4double fArYieldRatio;
-    G4double fArAbsLength;
+    G4double GetLightGuideRadius(){
+        return fLightGuideRadius;
+    }
+
+    G4double GetLightGuideLength(){
+        return fLightGuideLength;
+    }
+
+
+
+
 
 private:
     const G4double LambdaE;
@@ -433,7 +444,8 @@ private:
     G4double fShellThickness;
     G4double fFiberPlacementRadius;
     G4double fLightGuideLength;
-
+    G4double fArYieldRatio;
+    G4double fArAbsLength;
 
   
     G4ThreeVector fFiberPlacementCenter;

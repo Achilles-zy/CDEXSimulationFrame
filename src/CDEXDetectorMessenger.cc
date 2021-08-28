@@ -29,7 +29,9 @@ CDEXDetectorMessenger::CDEXDetectorMessenger(CDEXDetectorConstruction* Det)
 	cmdSetPENPropertiesID(0),
 	cmdCuShieldThickness(0),
 	cmdSetArAbsLength(0),
-	cmdSetArYieldRatio(0)
+	cmdSetArYieldRatio(0),
+	cmdSetLightGuideLength(0),
+	cmdSetLightGuideRadius(0)
 {
 	fDetDir = new G4UIdirectory("/CDEX/cons/set/");
 	fDetDir->SetGuidance("Set construction parameters");
@@ -71,6 +73,18 @@ CDEXDetectorMessenger::CDEXDetectorMessenger(CDEXDetectorConstruction* Det)
 	cmdSetArYieldRatio->SetParameterName("ArYieldRatio", false);
 	cmdSetArYieldRatio->AvailableForStates(G4State_PreInit, G4State_Idle);
 	cmdSetArYieldRatio->SetToBeBroadcasted(false);
+
+	cmdSetLightGuideRadius = new G4UIcmdWithADoubleAndUnit("/CDEX/cons/set/lightguideradius", this);
+	cmdSetLightGuideRadius->SetGuidance("Set Light Guide Radius");
+	cmdSetLightGuideRadius->SetParameterName("LightGuideRadius", false);
+	cmdSetLightGuideRadius->AvailableForStates(G4State_PreInit, G4State_Idle);
+	cmdSetLightGuideRadius->SetToBeBroadcasted(false);
+
+	cmdSetLightGuideLength = new G4UIcmdWithADoubleAndUnit("/CDEX/cons/set/lightguidelength", this);
+	cmdSetLightGuideLength->SetGuidance("Set Light Guide Length");
+	cmdSetLightGuideLength->SetParameterName("LightGuideLength", false);
+	cmdSetLightGuideLength->AvailableForStates(G4State_PreInit, G4State_Idle);
+	cmdSetLightGuideLength->SetToBeBroadcasted(false);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -84,6 +98,8 @@ CDEXDetectorMessenger::~CDEXDetectorMessenger()
 	delete cmdCuShieldThickness;
 	delete cmdSetArYieldRatio;
 	delete cmdSetArAbsLength;
+	delete cmdSetLightGuideRadius;
+	delete cmdSetLightGuideLength;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -109,5 +125,13 @@ void CDEXDetectorMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
 
 	if (command==cmdSetArYieldRatio){
 		fDetCons->SetArYieldRatio(cmdSetArYieldRatio->GetNewDoubleValue(newValue));
+	}
+
+	if (command==cmdSetLightGuideLength){
+		fDetCons->SetLightGuideLength(cmdSetLightGuideLength->GetNewDoubleValue(newValue));
+	}
+
+	if (command==cmdSetLightGuideRadius){
+		fDetCons->SetLightGuideRadius(cmdSetLightGuideRadius->GetNewDoubleValue(newValue));
 	}
 }

@@ -15,54 +15,59 @@
 #include "G4SystemOfUnits.hh"
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
- 
-CDEXTrackingAction::CDEXTrackingAction(CDEXEventAction* evt, CDEXDetectorConstruction* cons)
-    :CDEXEvent(evt),CDEXCons(cons)
+
+CDEXTrackingAction::CDEXTrackingAction(CDEXEventAction *evt, CDEXDetectorConstruction *cons)
+    : CDEXEvent(evt), CDEXCons(cons)
 {
     EdepTrack = 0;
     TrackPos = G4ThreeVector(0, 0, 0);
 }
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
- 
+
 CDEXTrackingAction::~CDEXTrackingAction()
-{}
+{
+}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
- 
-void CDEXTrackingAction::PreUserTrackingAction(const G4Track* track)
+
+void CDEXTrackingAction::PreUserTrackingAction(const G4Track *track)
 {
     EdepTrack = 0;
     TrackPos = G4ThreeVector(0, 0, 0);
     G4double trackTime = track->GetGlobalTime();
+    // if(track->GetParticleDefinition()->GetParticleName()=="opticalphoton"){
+    //     G4cout<<track->GetCreatorProcess()->GetProcessName()<<G4endl;
+    // }
+    
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
- 
-void CDEXTrackingAction::PostUserTrackingAction(const G4Track* trk)
+
+void CDEXTrackingAction::PostUserTrackingAction(const G4Track *trk)
 {
-    const CDEXDetectorConstruction* detectorConstruction
-        = static_cast<const CDEXDetectorConstruction*>
-        (G4RunManager::GetRunManager()->GetUserDetectorConstruction());
+    const CDEXDetectorConstruction *detectorConstruction = static_cast<const CDEXDetectorConstruction *>(G4RunManager::GetRunManager()->GetUserDetectorConstruction());
 
-	G4double Ekin = trk->GetKineticEnergy();
-	auto volume = trk->GetVolume();
-	G4LogicalVolume* logicvolume;
-	if (volume) {
-		logicvolume = volume->GetLogicalVolume();
-		//G4cout << volume << volume->GetName() << G4endl;
-		//G4cout << logicvolume << logicvolume->GetName() << G4endl;
-		//G4cout << G4endl;
-	}
+    G4double Ekin = trk->GetKineticEnergy();
+    auto volume = trk->GetVolume();
+    G4LogicalVolume *logicvolume;
 
-
+    if (volume)
+    {
+        logicvolume = volume->GetLogicalVolume();
+        //G4cout << volume << volume->GetName() << G4endl;
+        //G4cout << logicvolume << logicvolume->GetName() << G4endl;
+        //G4cout << G4endl;
+    }
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void CDEXTrackingAction::AddEdepTrack(G4double edepstep) {
+void CDEXTrackingAction::AddEdepTrack(G4double edepstep)
+{
     EdepTrack += edepstep;
 }
 
-void CDEXTrackingAction::RecordTrackPos(G4ThreeVector trackpos) {
+void CDEXTrackingAction::RecordTrackPos(G4ThreeVector trackpos)
+{
     TrackPos = trackpos;
 }

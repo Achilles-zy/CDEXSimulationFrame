@@ -186,6 +186,14 @@ public:
 			break;
 		}
 	}
+	
+	void SetRefresh(G4bool b){
+		ifRefresh=b;
+	}
+
+	G4bool GetRefresh(){
+		return ifRefresh;
+	}
 
 private:
 	//number of events that generate signals in bulk
@@ -268,6 +276,7 @@ private:
 	G4String filename;
 	G4String txtname;
 	G4int runID;
+	G4bool ifRefresh;
 };
 
 #endif
