@@ -105,7 +105,7 @@ public:
     G4LogicalVolume *ConstructLightGuide(G4double length, G4double radius, G4Material *Envmat);
     G4LogicalVolume *ConstructHexLightGuide(G4double length, G4double circumradius, G4Material *Envmat);
     G4LogicalVolume *ConstructRecLightGuide(G4double length, G4Material *Envmat);
-
+    G4LogicalVolume *ConstructCDEX300LArContainer();
     G4VPhysicalVolume *ConstructArExpSetup();
     //CDEX300
     G4LogicalVolume *ConstructCDEX300Bucket(G4double shieldthickness);
@@ -449,6 +449,7 @@ private:
 
   
     G4ThreeVector fFiberPlacementCenter;
+    G4ThreeVector StringPosList[19];
 
     CDEXDetectorMessenger *fDetectorMessenger;
     G4bool CheckOverlaps;

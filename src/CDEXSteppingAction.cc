@@ -104,7 +104,6 @@ void CDEXSteppingAction::UserSteppingAction(const G4Step *aStep)
 		{
 			logicvolume = volume->GetLogicalVolume();
 		}
-
 		auto touchable = aStep->GetPostStepPoint()->GetTouchableHandle();
 		auto ParticleName = aStep->GetTrack()->GetParticleDefinition()->GetParticleName();
 		auto edep = aStep->GetTotalEnergyDeposit();
@@ -250,5 +249,7 @@ G4double CDEXSteppingAction::GetEfficiency(G4double wavelength)
 	{
 		eff = 0;
 	}
+	G4double SiPMEffFactor=0.2;
+	eff=eff*SiPMEffFactor;
 	return eff;
 }
