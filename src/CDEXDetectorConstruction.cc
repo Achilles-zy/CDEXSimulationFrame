@@ -121,7 +121,7 @@ CDEXDetectorConstruction::CDEXDetectorConstruction() : G4VUserDetectorConstructi
 	fReflectorType = "PolisherESR_LUT";
 	// fMode = "CDEX300";
 	fMode = "CDEXArParametersTest";
-
+	fFiberShape = "Rec"; // Round & Rec
 	// Unit
 	// SArUnit
 	// Array-1
@@ -166,7 +166,7 @@ CDEXDetectorConstruction::CDEXDetectorConstruction() : G4VUserDetectorConstructi
 	fFiberPlacementRadius = 0.3 * m;
 	// fFiberPlacementRadius = 0.295 * m;//LEGEND
 	fFiberPlacementCenter = G4ThreeVector(0, 0, 0);
-	fFiberLength = 3 * m;
+	fFiberLength = 2.4 * m;
 	fLightGuideLength = 2.4 * m;
 
 	fFiberRadius = 0.5 * mm;
@@ -198,17 +198,17 @@ CDEXDetectorConstruction::CDEXDetectorConstruction() : G4VUserDetectorConstructi
 			G4ThreeVector(0, 0, 0),
 			G4ThreeVector(0, 1, 0),
 			G4ThreeVector(0, -1, 0),
-			G4ThreeVector(0, 2, 0),
-			G4ThreeVector(0, -2, 0),
 			G4ThreeVector(0.5 * sqrt(3), 0.5, 0),
 			G4ThreeVector(0.5 * sqrt(3), -0.5, 0),
+			G4ThreeVector(-0.5 * sqrt(3), 0.5, 0),
+			G4ThreeVector(-0.5 * sqrt(3), -0.5, 0),
+			G4ThreeVector(0, 2, 0),
+			G4ThreeVector(0, -2, 0),
 			G4ThreeVector(0.5 * sqrt(3), 1.5, 0),
 			G4ThreeVector(0.5 * sqrt(3), -1.5, 0),
 			G4ThreeVector(sqrt(3), 0, 0),
 			G4ThreeVector(sqrt(3), 1, 0),
 			G4ThreeVector(sqrt(3), -1, 0),
-			G4ThreeVector(-0.5 * sqrt(3), 0.5, 0),
-			G4ThreeVector(-0.5 * sqrt(3), -0.5, 0),
 			G4ThreeVector(-0.5 * sqrt(3), 1.5, 0),
 			G4ThreeVector(-0.5 * sqrt(3), -1.5, 0),
 			G4ThreeVector(-sqrt(3), 0, 0),
@@ -489,6 +489,7 @@ void CDEXDetectorConstruction::DefineMat()
 	MPT_PEN->AddProperty("RINDEX", wlPhotonEnergy, RINDEX_PEN, nEntries1)->SetSpline(true);
 	MPT_PEN->AddProperty("ABSLENGTH", wlPhotonEnergy, ABSORPTION_PEN, nEntries1)->SetSpline(true); // *
 
+	
 	// Read primary emission spectrum from PEN
 	// Measurements from MPP Munich
 	G4double pWavelength;
@@ -2001,11 +2002,23 @@ G4LogicalVolume *CDEXDetectorConstruction::ConstructFiberSiPM()
 	G4double SiPMRadius = fFiberRadius;
 	G4double TPBThickness = 2 * micrometer;
 	// G4Box* solidCoatedSiPM = new G4Box("solidCoatedSiPM", SiPMWidth / 2, SiPMLength / 2, SiPMThickness / 2 + TPBThickness);
-	G4Tubs *solidCoatedSiPM = new G4Tubs("solidCoatedSiPM", 0, SiPMRadius, SiPMThickness / 2 + TPBThickness, 0, twopi);
-	G4LogicalVolume *logicCoatedFiberSiPM = new G4LogicalVolume(solidCoatedSiPM, matTPB, "logicCoatedFiberSiPM");
-	G4Tubs *solidSiPMChip = new G4Tubs("solidSiPM", 0, SiPMRadius, SiPMThickness / 2, 0, twopi);
-	logicFiberSiPM = new G4LogicalVolume(solidSiPMChip, matSi, "logicFiberSiPM");
-	physFiberSiPM = new G4PVPlacement(0, G4ThreeVector(0, 0, 0), logicFiberSiPM, "physFiberSiPM", logicCoatedFiberSiPM, false, 0, CheckOverlaps);
+	G4LogicalVolume *logicCoatedFiberSiPM;
+	if (fFiberShape == "Round")
+	{
+		G4Tubs *solidCoatedSiPM = new G4Tubs("solidCoatedSiPM", 0, SiPMRadius, SiPMThickness / 2 + TPBThickness, 0, twopi);
+		logicCoatedFiberSiPM = new G4LogicalVolume(solidCoatedSiPM, matTPB, "logicCoatedFiberSiPM");
+		G4Tubs *solidSiPMChip = new G4Tubs("solidSiPM", 0, SiPMRadius, SiPMThickness / 2, 0, twopi);
+		logicFiberSiPM = new G4LogicalVolume(solidSiPMChip, matSi, "logicFiberSiPM");
+		physFiberSiPM = new G4PVPlacement(0, G4ThreeVector(0, 0, 0), logicFiberSiPM, "physFiberSiPM", logicCoatedFiberSiPM, false, 0, CheckOverlaps);
+	}
+	else if (fFiberShape == "Rec")
+	{
+		G4Box *solidCoatedSiPM = new G4Box("solidCoatedSiPM", SiPMRadius, SiPMRadius, SiPMThickness / 2 + TPBThickness);
+		logicCoatedFiberSiPM = new G4LogicalVolume(solidCoatedSiPM, matTPB, "logicCoatedFiberSiPM");
+		G4Box *solidSiPMChip = new G4Box("solidSiPM", SiPMRadius, SiPMRadius, SiPMThickness / 2);
+		logicFiberSiPM = new G4LogicalVolume(solidSiPMChip, matSi, "logicFiberSiPM");
+		physFiberSiPM = new G4PVPlacement(0, G4ThreeVector(0, 0, 0), logicFiberSiPM, "physFiberSiPM", logicCoatedFiberSiPM, false, 0, CheckOverlaps);
+	}
 
 	const G4int NUMENTRIES_CHIP = 10;
 	G4double SiPMPhotonEnergy[NUMENTRIES_CHIP];
@@ -2371,46 +2384,90 @@ G4LogicalVolume *CDEXDetectorConstruction::ConstructLightFiber(G4double length)
 	G4LogicalVolume *logicFiberInnerCladding;
 	G4LogicalVolume *logicFiberOuterCladding;
 	G4LogicalVolume *logicFiberWLSLayer;
-
-	if (ifFiberTPB == true)
+	if (fFiberShape == "Round")
 	{
-		auto solidFiber = new G4Tubs("solidFiber", 0, fFiberRadius + fFiberTPBThickness, length / 2, 0, twopi);
-		auto solidFiberCore = new G4Tubs("solidFiberCore", 0, fFiberRadius - fFiberInnerCladdingThickness - fFiberOuterCladdingThickness, length / 2, 0, twopi);
-		auto solidFiberInnerCladding = new G4Tubs("solidInnerCladding", fFiberRadius - fFiberInnerCladdingThickness - fFiberOuterCladdingThickness, fFiberRadius - fFiberOuterCladdingThickness, length / 2, 0, twopi);
-		auto solidFiberOuterCladding = new G4Tubs("solidFiberOuterCladding", fFiberRadius - fFiberOuterCladdingThickness, fFiberRadius, length / 2, 0, twopi);
-		auto solidFiberWLSLayer = new G4Tubs("solidFiberTPB", fFiberRadius, fFiberRadius + fFiberTPBThickness, length / 2, 0, twopi);
+		if (ifFiberTPB == true)
+		{
+			auto solidFiber = new G4Tubs("solidFiber", 0, fFiberRadius + fFiberTPBThickness, length / 2, 0, twopi);
+			auto solidFiberCore = new G4Tubs("solidFiberCore", 0, fFiberRadius - fFiberInnerCladdingThickness - fFiberOuterCladdingThickness, length / 2, 0, twopi);
+			auto solidFiberInnerCladding = new G4Tubs("solidInnerCladding", fFiberRadius - fFiberInnerCladdingThickness - fFiberOuterCladdingThickness, fFiberRadius - fFiberOuterCladdingThickness, length / 2, 0, twopi);
+			auto solidFiberOuterCladding = new G4Tubs("solidFiberOuterCladding", fFiberRadius - fFiberOuterCladdingThickness, fFiberRadius, length / 2, 0, twopi);
+			auto solidFiberWLSLayer = new G4Tubs("solidFiberTPB", fFiberRadius, fFiberRadius + fFiberTPBThickness, length / 2, 0, twopi);
 
-		G4Material *CoreMaterial = matPolystyrene;
-		logicFiber = new G4LogicalVolume(solidFiber, CoreMaterial, "logicFiber");
-		logicFiberCore = new G4LogicalVolume(solidFiberCore, CoreMaterial, "logicFiberCore");
-		logicFiberInnerCladding = new G4LogicalVolume(solidFiberInnerCladding, matPMMA, "logicFiberInnerCladding");
-		logicFiberOuterCladding = new G4LogicalVolume(solidFiberOuterCladding, matFluorAcrylic, "logicFiberOuterCladding");
+			G4Material *CoreMaterial = matPolystyrene;
+			logicFiber = new G4LogicalVolume(solidFiber, CoreMaterial, "logicFiber");
+			logicFiberCore = new G4LogicalVolume(solidFiberCore, CoreMaterial, "logicFiberCore");
+			logicFiberInnerCladding = new G4LogicalVolume(solidFiberInnerCladding, matPMMA, "logicFiberInnerCladding");
+			logicFiberOuterCladding = new G4LogicalVolume(solidFiberOuterCladding, matFluorAcrylic, "logicFiberOuterCladding");
 
-		logicFiberWLSLayer = new G4LogicalVolume(solidFiberWLSLayer, matTPB, "logicFiberWLSLayer");
+			logicFiberWLSLayer = new G4LogicalVolume(solidFiberWLSLayer, matTPB, "logicFiberWLSLayer");
 
-		auto physFiberCore = new G4PVPlacement(0, G4ThreeVector(), logicFiberCore, "FiberCore", logicFiber, false, 0, CheckOverlaps);
-		auto physFiberInnerCladding = new G4PVPlacement(0, G4ThreeVector(), logicFiberInnerCladding, "FiberInnerCladding", logicFiber, false, 0, CheckOverlaps);
-		auto physFiberOuterCladding = new G4PVPlacement(0, G4ThreeVector(), logicFiberOuterCladding, "FiberOuterCladding", logicFiber, false, 0, CheckOverlaps);
-		auto physFiberWLSLayer = new G4PVPlacement(0, G4ThreeVector(), logicFiberWLSLayer, "FiberWLSLayer", logicFiber, false, 0, CheckOverlaps);
+			auto physFiberCore = new G4PVPlacement(0, G4ThreeVector(), logicFiberCore, "FiberCore", logicFiber, false, 0, CheckOverlaps);
+			auto physFiberInnerCladding = new G4PVPlacement(0, G4ThreeVector(), logicFiberInnerCladding, "FiberInnerCladding", logicFiber, false, 0, CheckOverlaps);
+			auto physFiberOuterCladding = new G4PVPlacement(0, G4ThreeVector(), logicFiberOuterCladding, "FiberOuterCladding", logicFiber, false, 0, CheckOverlaps);
+			auto physFiberWLSLayer = new G4PVPlacement(0, G4ThreeVector(), logicFiberWLSLayer, "FiberWLSLayer", logicFiber, false, 0, CheckOverlaps);
+		}
+		else
+		{
+			auto solidFiber = new G4Tubs("solidFiber", 0, fFiberRadius, length / 2, 0, twopi);
+			auto solidFiberCore = new G4Tubs("solidFiberCore", 0, fFiberRadius - fFiberInnerCladdingThickness - fFiberOuterCladdingThickness, length / 2, 0, twopi);
+			auto solidFiberInnerCladding = new G4Tubs("solidInnerCladding", fFiberRadius - fFiberInnerCladdingThickness - fFiberOuterCladdingThickness, fFiberRadius - fFiberOuterCladdingThickness, length / 2, 0, twopi);
+			auto solidFiberOuterCladding = new G4Tubs("solidFiberOuterCladding", fFiberRadius - fFiberOuterCladdingThickness, fFiberRadius, length / 2, 0, twopi);
+
+			G4Material *CoreMaterial = matPolystyrene;
+			logicFiber = new G4LogicalVolume(solidFiber, CoreMaterial, "logicFiber");
+			logicFiberCore = new G4LogicalVolume(solidFiberCore, CoreMaterial, "logicFiberCore");
+			logicFiberInnerCladding = new G4LogicalVolume(solidFiberInnerCladding, matPMMA, "logicFiberInnerCladding");
+			logicFiberOuterCladding = new G4LogicalVolume(solidFiberOuterCladding, matFluorAcrylic, "logicFiberOuterCladding");
+
+			auto physFiberCore = new G4PVPlacement(0, G4ThreeVector(), logicFiberCore, "FiberCore", logicFiber, false, 0, CheckOverlaps);
+			auto physFiberInnerCladding = new G4PVPlacement(0, G4ThreeVector(), logicFiberInnerCladding, "FiberInnerCladding", logicFiber, false, 0, CheckOverlaps);
+			auto physFiberOuterCladding = new G4PVPlacement(0, G4ThreeVector(), logicFiberOuterCladding, "FiberOuterCladding", logicFiber, false, 0, CheckOverlaps);
+		}
 	}
-	else
+	else if (fFiberShape == "Rec")
 	{
-		auto solidFiber = new G4Tubs("solidFiber", 0, fFiberRadius, length / 2, 0, twopi);
-		auto solidFiberCore = new G4Tubs("solidFiberCore", 0, fFiberRadius - fFiberInnerCladdingThickness - fFiberOuterCladdingThickness, length / 2, 0, twopi);
-		auto solidFiberInnerCladding = new G4Tubs("solidInnerCladding", fFiberRadius - fFiberInnerCladdingThickness - fFiberOuterCladdingThickness, fFiberRadius - fFiberOuterCladdingThickness, length / 2, 0, twopi);
-		auto solidFiberOuterCladding = new G4Tubs("solidFiberOuterCladding", fFiberRadius - fFiberOuterCladdingThickness, fFiberRadius, length / 2, 0, twopi);
+		if (ifFiberTPB == true)
+		{
+			auto solidFiber = new G4Box("solidFiber", fFiberRadius + fFiberTPBThickness, fFiberRadius + fFiberTPBThickness, length / 2);
+			auto solidFiberCore = new G4Box("solidFiberCore", fFiberRadius - fFiberInnerCladdingThickness - fFiberOuterCladdingThickness, fFiberRadius - fFiberInnerCladdingThickness - fFiberOuterCladdingThickness, length / 2);
+			auto solidToFiberInnerCladding = new G4Box("solidInnerCladding", fFiberRadius - fFiberOuterCladdingThickness, fFiberRadius - fFiberOuterCladdingThickness, length / 2);
+			auto solidToFiberOuterCladding = new G4Box("solidFiberOuterCladding", fFiberRadius, fFiberRadius, length / 2);
 
-		G4Material *CoreMaterial = matPolystyrene;
-		logicFiber = new G4LogicalVolume(solidFiber, CoreMaterial, "logicFiber");
-		logicFiberCore = new G4LogicalVolume(solidFiberCore, CoreMaterial, "logicFiberCore");
-		logicFiberInnerCladding = new G4LogicalVolume(solidFiberInnerCladding, matPMMA, "logicFiberInnerCladding");
-		logicFiberOuterCladding = new G4LogicalVolume(solidFiberOuterCladding, matFluorAcrylic, "logicFiberOuterCladding");
+			auto solidFiberInnerCladding = new G4SubtractionSolid("solidFiberInnerCladding", solidToFiberInnerCladding, solidFiberCore);
+			auto solidFiberOuterCladding = new G4SubtractionSolid("solidFiberOuterCladding", solidToFiberOuterCladding, solidToFiberInnerCladding);
+			auto solidFiberWLSLayer = new G4SubtractionSolid("solidFiberWLSLayer", solidFiber, solidToFiberOuterCladding);
+			G4Material *CoreMaterial = matPolystyrene;
+			logicFiber = new G4LogicalVolume(solidFiber, CoreMaterial, "logicFiber");
+			logicFiberCore = new G4LogicalVolume(solidFiberCore, CoreMaterial, "logicFiberCore");
+			logicFiberInnerCladding = new G4LogicalVolume(solidFiberInnerCladding, matPMMA, "logicFiberInnerCladding");
+			logicFiberOuterCladding = new G4LogicalVolume(solidFiberOuterCladding, matFluorAcrylic, "logicFiberOuterCladding");
 
-		auto physFiberCore = new G4PVPlacement(0, G4ThreeVector(), logicFiberCore, "FiberCore", logicFiber, false, 0, CheckOverlaps);
-		auto physFiberInnerCladding = new G4PVPlacement(0, G4ThreeVector(), logicFiberInnerCladding, "FiberInnerCladding", logicFiber, false, 0, CheckOverlaps);
-		auto physFiberOuterCladding = new G4PVPlacement(0, G4ThreeVector(), logicFiberOuterCladding, "FiberOuterCladding", logicFiber, false, 0, CheckOverlaps);
+			logicFiberWLSLayer = new G4LogicalVolume(solidFiberWLSLayer, matTPB, "logicFiberWLSLayer");
+
+			auto physFiberCore = new G4PVPlacement(0, G4ThreeVector(), logicFiberCore, "FiberCore", logicFiber, false, 0, CheckOverlaps);
+			auto physFiberInnerCladding = new G4PVPlacement(0, G4ThreeVector(), logicFiberInnerCladding, "FiberInnerCladding", logicFiber, false, 0, CheckOverlaps);
+			auto physFiberOuterCladding = new G4PVPlacement(0, G4ThreeVector(), logicFiberOuterCladding, "FiberOuterCladding", logicFiber, false, 0, CheckOverlaps);
+			auto physFiberWLSLayer = new G4PVPlacement(0, G4ThreeVector(), logicFiberWLSLayer, "FiberWLSLayer", logicFiber, false, 0, CheckOverlaps);
+		}
+		else
+		{
+			auto solidFiber = new G4Box("solidFiber", fFiberRadius, fFiberRadius, length / 2);
+			auto solidFiberCore = new G4Box("solidFiberCore", fFiberRadius - fFiberInnerCladdingThickness - fFiberOuterCladdingThickness, fFiberRadius - fFiberInnerCladdingThickness - fFiberOuterCladdingThickness, length / 2);
+			auto solidToFiberInnerCladding = new G4Box("solidInnerCladding", fFiberRadius - fFiberOuterCladdingThickness, fFiberRadius - fFiberOuterCladdingThickness, length / 2);
+
+			auto solidFiberInnerCladding = new G4SubtractionSolid("solidFiberInnerCladding", solidToFiberInnerCladding, solidFiberCore);
+			auto solidFiberOuterCladding = new G4SubtractionSolid("solidFiberOuterCladding", solidFiber, solidToFiberInnerCladding);
+			G4Material *CoreMaterial = matPolystyrene;
+			logicFiber = new G4LogicalVolume(solidFiber, CoreMaterial, "logicFiber");
+			logicFiberCore = new G4LogicalVolume(solidFiberCore, CoreMaterial, "logicFiberCore");
+			logicFiberInnerCladding = new G4LogicalVolume(solidFiberInnerCladding, matPMMA, "logicFiberInnerCladding");
+			logicFiberOuterCladding = new G4LogicalVolume(solidFiberOuterCladding, matFluorAcrylic, "logicFiberOuterCladding");
+			auto physFiberCore = new G4PVPlacement(0, G4ThreeVector(), logicFiberCore, "FiberCore", logicFiber, false, 0, CheckOverlaps);
+			auto physFiberInnerCladding = new G4PVPlacement(0, G4ThreeVector(), logicFiberInnerCladding, "FiberInnerCladding", logicFiber, false, 0, CheckOverlaps);
+			auto physFiberOuterCladding = new G4PVPlacement(0, G4ThreeVector(), logicFiberOuterCladding, "FiberOuterCladding", logicFiber, false, 0, CheckOverlaps);
+		}
 	}
-
 	const G4int NUMENTRIES_FIBER = 4;
 	G4double Wavelength[NUMENTRIES_FIBER] = {100., 200., 301., 650.};
 
@@ -2458,27 +2515,118 @@ void CDEXDetectorConstruction::ConstructLightFiberArray(G4LogicalVolume *motherL
 	G4LogicalVolume *logicFiberSiPMChip = ConstructFiberSiPM();
 	G4LogicalVolume *MotherLV = motherLV;
 
+	G4LogicalVolume *logicSiBoard;
 	G4double BoardThickness = 1 * mm;
-	G4Tubs *solidSiBoard = new G4Tubs("solidSiBoard", 0, fFiberRadius, BoardThickness / 2, 0, twopi);
-	G4LogicalVolume *logicSiBoard = new G4LogicalVolume(solidSiBoard, matSi, "logicSiBoard");
-
+	if (fFiberShape == "Round")
+	{
+		G4Tubs *solidSiBoard = new G4Tubs("solidSiBoard", 0, fFiberRadius, BoardThickness / 2, 0, twopi);
+		logicSiBoard = new G4LogicalVolume(solidSiBoard, matSi, "logicSiBoard");
+	}
+	else if (fFiberShape == "Rec")
+	{
+		G4Box *solidSiBoard = new G4Box("solidSiBoard", fFiberRadius, fFiberRadius, BoardThickness / 2);
+		logicSiBoard = new G4LogicalVolume(solidSiBoard, matSi, "logicSiBoard");
+	}
 	G4double DeltaAngle = 2 * asin((fFiberRadius + fFiberTPBThickness) / PlacementRadius);
 	G4int FiberAmount = std::floor(twopi / DeltaAngle);
 	G4double RealDeltaAngle = twopi / FiberAmount;
 
 	G4PVPlacement *physLightFiberSet[4000] = {nullptr};
-	G4PVPlacement *physFiberSiPMSet[4000] = {nullptr};
-	G4PVPlacement *physSiBoardSet[4000] = {nullptr};
+	G4PVPlacement *physFiberSiPMSetUp[4000] = {nullptr};
+	G4PVPlacement *physSiBoardSetUp[4000] = {nullptr};
+	G4PVPlacement *physFiberSiPMSetDown[4000] = {nullptr};
+	G4PVPlacement *physSiBoardSetDown[4000] = {nullptr};
 	for (G4int FiberNb = 0; FiberNb < FiberAmount; FiberNb++)
 	{
 		G4double PosAngle = FiberNb * RealDeltaAngle;
-		G4ThreeVector posFiber = G4ThreeVector(PlacementRadius * cos(PosAngle), PlacementRadius * sin(PosAngle), 0);
-		G4ThreeVector posFiberSiPM = G4ThreeVector(0, 0, FiberLength / 2 + FiberSiPMThickness / 2 + FiberSiPMTPBThickness) + posFiber;
+		G4ThreeVector posFiber = G4ThreeVector((PlacementRadius+fFiberRadius) * cos(PosAngle), (PlacementRadius+fFiberRadius)  * sin(PosAngle), 0);
+		G4ThreeVector posFiberSiPMUp = G4ThreeVector(0, 0, FiberLength / 2 + FiberSiPMThickness / 2 + FiberSiPMTPBThickness);
+		G4ThreeVector posFiberSiPMDown = G4ThreeVector(0, 0, -FiberLength / 2 - FiberSiPMThickness / 2 - FiberSiPMTPBThickness);
 		G4RotationMatrix *rotFiber = new G4RotationMatrix();
-		rotFiber->rotateZ(PosAngle);
+		rotFiber->rotateZ(-PosAngle);
 		physLightFiberSet[FiberNb] = new G4PVPlacement(rotFiber, posFiber + PlacementCenter, logicFiber, "Fiber", MotherLV, false, std::floor(FiberNb / 30), CheckOverlaps);
-		physFiberSiPMSet[FiberNb] = new G4PVPlacement(rotFiber, posFiberSiPM + PlacementCenter, logicFiberSiPMChip, "FiberSiPM", MotherLV, false, std::floor(FiberNb / 30), CheckOverlaps);
-		physSiBoardSet[FiberNb] = new G4PVPlacement(rotFiber, posFiberSiPM + PlacementCenter + G4ThreeVector(0, 0, FiberSiPMThickness / 2 + FiberSiPMTPBThickness + BoardThickness / 2), logicSiBoard, "SiBoard", MotherLV, false, std::floor(FiberNb / 30), CheckOverlaps);
+		physFiberSiPMSetUp[FiberNb] = new G4PVPlacement(rotFiber, posFiberSiPMUp + posFiber + PlacementCenter, logicFiberSiPMChip, "FiberSiPM", MotherLV, false, std::floor(FiberNb / 30), CheckOverlaps);
+		physSiBoardSetUp[FiberNb] = new G4PVPlacement(rotFiber, posFiberSiPMUp + posFiber + PlacementCenter + G4ThreeVector(0, 0, FiberSiPMThickness / 2 + FiberSiPMTPBThickness + BoardThickness / 2), logicSiBoard, "SiBoard", MotherLV, false, std::floor(FiberNb / 30), CheckOverlaps);
+		physFiberSiPMSetDown[FiberNb] = new G4PVPlacement(rotFiber, posFiberSiPMDown + posFiber + PlacementCenter, logicFiberSiPMChip, "FiberSiPM", MotherLV, false, std::floor(FiberNb / 30), CheckOverlaps);
+		physSiBoardSetDown[FiberNb] = new G4PVPlacement(rotFiber, posFiberSiPMDown + posFiber + PlacementCenter + G4ThreeVector(0, 0, -FiberSiPMThickness / 2 - FiberSiPMTPBThickness - BoardThickness / 2), logicSiBoard, "SiBoard", MotherLV, false, std::floor(FiberNb / 30), CheckOverlaps);
+	}
+}
+
+void CDEXDetectorConstruction::ConstructHexLightFiberArray(G4LogicalVolume *motherLV, G4ThreeVector pos, G4double circumradius)
+{
+	G4double FiberLength = fFiberLength;
+	G4double FiberSiPMThickness = 0.5 * mm;
+	G4double FiberSiPMTPBThickness = 2 * micrometer;
+	G4double PlacementRadius = circumradius;
+	G4ThreeVector PlacementCenter = pos;
+	G4LogicalVolume *logicFiber = ConstructLightFiber(FiberLength);
+	G4LogicalVolume *logicFiberSiPMChip = ConstructFiberSiPM();
+	G4LogicalVolume *MotherLV = motherLV;
+	G4int EdgeNb = std::floor(circumradius / fFiberRadius / 10);
+	G4ThreeVector PosFiberList[EdgeNb * 6 - 6];
+	G4double RotFiberList[EdgeNb * 6 - 6];
+
+	for (G4int FiberNb = 0; FiberNb < EdgeNb - 1; FiberNb++)
+	{
+		G4ThreeVector posFiberFront = G4ThreeVector(circumradius * (-1.0 + 1.0 / 2.0 / EdgeNb * (FiberNb + 1)), circumradius * (sqrt(3) / 2.0 / EdgeNb * (FiberNb + 1)), 0);
+		G4ThreeVector posFiberBack = G4ThreeVector(circumradius * (-1.0 + 1.0 / 2.0 / EdgeNb * (FiberNb + 1)), -circumradius * (sqrt(3) / 2.0 / EdgeNb * (FiberNb + 1)), 0);
+		PosFiberList[FiberNb * 2] = posFiberFront;
+		PosFiberList[FiberNb * 2 + 1] = posFiberBack;
+		RotFiberList[FiberNb * 2] = -pi / 3;
+		RotFiberList[FiberNb * 2 + 1] = pi / 3;
+	}
+
+	for (G4int FiberNb = 0; FiberNb < EdgeNb - 1; FiberNb++)
+	{
+		G4ThreeVector posFiberFront = G4ThreeVector(circumradius * (-1.0 / 2.0 + 1.0 / EdgeNb * (FiberNb + 1)), circumradius * (sqrt(3) / 2.0), 0);
+		G4ThreeVector posFiberBack = G4ThreeVector(circumradius * (-1.0 / 2.0 + 1.0 / EdgeNb * (FiberNb + 1)), -circumradius * (sqrt(3) / 2.0), 0);
+		PosFiberList[FiberNb * 2 + 2 * EdgeNb - 2] = posFiberFront;
+		PosFiberList[FiberNb * 2 + 2 * EdgeNb - 1] = posFiberBack;
+		RotFiberList[FiberNb * 2 + 2 * EdgeNb - 2] = 0;
+		RotFiberList[FiberNb * 2 + 2 * EdgeNb - 1] = 0;
+	}
+
+	for (G4int FiberNb = 0; FiberNb < EdgeNb - 1; FiberNb++)
+	{
+		G4ThreeVector posFiberFront = G4ThreeVector(circumradius * (1.0 / 2.0 + 1.0 / 2.0 / EdgeNb * (FiberNb + 1)), circumradius * (sqrt(3) / 2.0 - sqrt(3) / 2.0 / EdgeNb * (FiberNb + 1)), 0);
+		G4ThreeVector posFiberBack = G4ThreeVector(circumradius * (1.0 / 2.0 + 1.0 / 2.0 / EdgeNb * (FiberNb + 1)), -circumradius * (sqrt(3) / 2.0 - sqrt(3) / 2.0 / EdgeNb * (FiberNb + 1)), 0);
+		PosFiberList[FiberNb * 2 + 4 * EdgeNb - 4] = posFiberFront;
+		PosFiberList[FiberNb * 2 + 4 * EdgeNb - 3] = posFiberBack;
+		RotFiberList[FiberNb * 2 + 4 * EdgeNb - 4] = pi / 3;
+		RotFiberList[FiberNb * 2 + 4 * EdgeNb - 3] = -pi / 3;
+	}
+
+	G4double BoardThickness = 1 * mm;
+	G4LogicalVolume *logicSiBoard;
+	if (fFiberShape == "Round")
+	{
+		G4Tubs *solidSiBoard = new G4Tubs("solidSiBoard", 0, fFiberRadius, BoardThickness / 2, 0, twopi);
+		logicSiBoard = new G4LogicalVolume(solidSiBoard, matSi, "logicSiBoard");
+	}
+	else if (fFiberShape == "Rec")
+	{
+		G4Box *solidSiBoard = new G4Box("solidSiBoard", fFiberRadius, fFiberRadius, BoardThickness / 2);
+		logicSiBoard = new G4LogicalVolume(solidSiBoard, matSi, "logicSiBoard");
+	}
+
+	G4PVPlacement *physLightFiberSet[4000] = {nullptr};
+	G4PVPlacement *physFiberSiPMSetUp[4000] = {nullptr};
+	G4PVPlacement *physSiBoardSetUp[4000] = {nullptr};
+	G4PVPlacement *physFiberSiPMSetDown[4000] = {nullptr};
+	G4PVPlacement *physSiBoardSetDown[4000] = {nullptr};
+	for (G4int FiberNb = 0; FiberNb < 6 * EdgeNb - 6; FiberNb++)
+	{
+		G4ThreeVector posFiber = PosFiberList[FiberNb];
+
+		G4ThreeVector posFiberSiPMUp = G4ThreeVector(0, 0, FiberLength / 2 + FiberSiPMThickness / 2 + FiberSiPMTPBThickness);
+		G4ThreeVector posFiberSiPMDown = G4ThreeVector(0, 0, -FiberLength / 2 - FiberSiPMThickness / 2 - FiberSiPMTPBThickness);
+		G4RotationMatrix *rotFiber = new G4RotationMatrix();
+		rotFiber->rotateZ(RotFiberList[FiberNb]);
+		physLightFiberSet[FiberNb] = new G4PVPlacement(rotFiber, posFiber + PlacementCenter, logicFiber, "Fiber", MotherLV, false, std::floor(FiberNb / 30), CheckOverlaps);
+		physFiberSiPMSetUp[FiberNb] = new G4PVPlacement(rotFiber, posFiberSiPMUp + posFiber + PlacementCenter, logicFiberSiPMChip, "FiberSiPM", MotherLV, false, std::floor(FiberNb / 30), CheckOverlaps);
+		physSiBoardSetUp[FiberNb] = new G4PVPlacement(rotFiber, posFiberSiPMUp + posFiber + PlacementCenter + G4ThreeVector(0, 0, FiberSiPMThickness / 2 + FiberSiPMTPBThickness + BoardThickness / 2), logicSiBoard, "SiBoard", MotherLV, false, std::floor(FiberNb / 30), CheckOverlaps);
+		physFiberSiPMSetDown[FiberNb] = new G4PVPlacement(rotFiber, posFiberSiPMDown + posFiber + PlacementCenter, logicFiberSiPMChip, "FiberSiPM", MotherLV, false, std::floor(FiberNb / 30), CheckOverlaps);
+		physSiBoardSetDown[FiberNb] = new G4PVPlacement(rotFiber, posFiberSiPMDown + posFiber + PlacementCenter + G4ThreeVector(0, 0, -FiberSiPMThickness / 2 - FiberSiPMTPBThickness - BoardThickness / 2), logicSiBoard, "SiBoard", MotherLV, false, std::floor(FiberNb / 30), CheckOverlaps);
 	}
 }
 
@@ -2665,9 +2813,9 @@ G4LogicalVolume *CDEXDetectorConstruction::ConstructHexLightGuide(G4double lengt
 	G4TwoVector offsetA(0, 0), offsetB(0, 0);
 	G4double scaleA = 1, scaleB = 1;
 	G4VSolid *Extruded0 = new G4ExtrudedSolid("Extruded0", Polygon0, length / 2, offsetA, scaleA, offsetB, scaleB);
-	G4VSolid *Extruded1 = new G4ExtrudedSolid("Extruded1", Polygon1, length / 2+0.1*mm, offsetA, scaleA, offsetB, scaleB);
-	G4VSolid *Extruded2 = new G4ExtrudedSolid("Extruded2", Polygon2, length / 2+0.2*mm, offsetA, scaleA, offsetB, scaleB);
-	G4VSolid *Extruded3 = new G4ExtrudedSolid("Extruded3", Polygon3, length / 2+0.3*mm, offsetA, scaleA, offsetB, scaleB);//Small values make sure the tube is open
+	G4VSolid *Extruded1 = new G4ExtrudedSolid("Extruded1", Polygon1, length / 2 + 0.1 * mm, offsetA, scaleA, offsetB, scaleB);
+	G4VSolid *Extruded2 = new G4ExtrudedSolid("Extruded2", Polygon2, length / 2 + 0.2 * mm, offsetA, scaleA, offsetB, scaleB);
+	G4VSolid *Extruded3 = new G4ExtrudedSolid("Extruded3", Polygon3, length / 2 + 0.3 * mm, offsetA, scaleA, offsetB, scaleB); // Small values make sure the tube is open
 
 	auto solidLightGuide = new G4SubtractionSolid("solidLightGuide", Extruded0, Extruded3);
 	auto solidLightGuideOuterTPB = new G4SubtractionSolid("solidLightGuide", Extruded0, Extruded1);
@@ -4293,6 +4441,8 @@ G4VPhysicalVolume *CDEXDetectorConstruction::ConstructCDEX300()
 		physArVolumeSiPMSet[0][strid] = new G4PVPlacement(0, G4ThreeVector(0, 0, fLightGuideLength / 2 + 3 * mm) + XYPos, logicArVolumeSiPMChip, "ArVolumeSiPM", logicArVolume, false, 0, checkOverlaps);
 		physArVolumeSiPMSet[1][strid] = new G4PVPlacement(0, G4ThreeVector(0, 0, -fLightGuideLength / 2 - 3 * mm) + XYPos, logicArVolumeSiPMChip, "ArVolumeSiPM", logicArVolume, false, 1, checkOverlaps);
 		physArLightGuideSet[strid] = new G4PVPlacement(0, XYPos, logicLightGuide, "LightGuide", logicArVolume, false, 0, checkOverlaps);
+		//ConstructHexLightFiberArray(logicArVolume, XYPos, fLightGuideRadius);
+		//ConstructLightFiberArray(logicArVolume, XYPos, fLightGuideRadius);
 	}
 
 	//=============================================================//
@@ -4488,15 +4638,16 @@ G4VPhysicalVolume *CDEXDetectorConstruction::ConstructBucketLightGuideSystem()
 	//=============================================================//
 	G4double LightGuideRadius = fLightGuideRadius;
 	G4double LightGuideLength = fLightGuideLength;
-	//auto logicLightGuide = ConstructLightGuide(LightGuideLength, LightGuideRadius, matLAr);
+	// auto logicLightGuide = ConstructLightGuide(LightGuideLength, LightGuideRadius, matLAr);
 	auto logicLightGuide = ConstructHexLightGuide(LightGuideLength, LightGuideRadius, matLAr);
+
 	//=============================================================//
 	//                        Light Readout                        //
 	//=============================================================//
-	auto logicArVolumeSiPMChip = ConstructArVolumeSiPM(LightGuideRadius / 2);
-
+	//auto logicArVolumeSiPMChip = ConstructArVolumeSiPM(LightGuideRadius);
+	auto logicArVolumeSiPMChip = ConstructArVolumeHexSiPM(LightGuideRadius);
 	//=============================================================//
-	//                            String                            //
+	//                            String                           //
 	//=============================================================//
 
 	// Rotation and translation of a plate inside the assembly
@@ -4520,19 +4671,21 @@ G4VPhysicalVolume *CDEXDetectorConstruction::ConstructBucketLightGuideSystem()
 	G4PVPlacement *physArLightGuideSet[19] = {nullptr};
 	G4double StringDist = fLightGuideRadius * sqrt(3) + 5 * mm; // distance between two strings
 
-	for (G4int strid = 0; strid < 1; strid++)
+	for (G4int strid = 0; strid < 19; strid++)
 	{
 		G4ThreeVector XYPos = StringPosList[strid] * StringDist;
 		for (G4int i = 0; i < fUnitNb; i++)
 		{
 			G4ThreeVector PosUnit = G4ThreeVector(0, 0, (SmallestUnitHeight / 2 + SmallestUnitHeight * ceil(i / 2)) * pow(-1, i)) + XYPos;
-			//physPackedBEGe[i][strid] = new G4PVPlacement(RotBEGe, PosUnit + PosBEGe, logicShell, "PackedBEGe", logicArVolume, false, 0, checkOverlaps);
-			//physWire[i][strid] = new G4PVPlacement(RotWire, PosUnit + PosWire, logicWire, "Wire", logicArVolume, false, 0, checkOverlaps);
-			//physASIC[i][strid] = new G4PVPlacement(RotASIC, PosUnit + PosASIC, logicASICPlate, "ASIC", logicArVolume, false, 0, checkOverlaps);
+			physPackedBEGe[i][strid] = new G4PVPlacement(RotBEGe, PosUnit + PosBEGe, logicShell, "PackedBEGe", logicArVolume, false, 0, checkOverlaps);
+			physWire[i][strid] = new G4PVPlacement(RotWire, PosUnit + PosWire, logicWire, "Wire", logicArVolume, false, 0, checkOverlaps);
+			physASIC[i][strid] = new G4PVPlacement(RotASIC, PosUnit + PosASIC, logicASICPlate, "ASIC", logicArVolume, false, 0, checkOverlaps);
 		}
-		//physArVolumeSiPMSet[0][strid] = new G4PVPlacement(0, G4ThreeVector(0, 0, fLightGuideLength / 2 + 3 * mm), logicArVolumeSiPMChip, "ArVolumeSiPM", logicArVolume, false, 0, checkOverlaps);
-		//physArVolumeSiPMSet[1][strid] = new G4PVPlacement(0, G4ThreeVector(0, 0, -fLightGuideLength / 2 - 3 * mm), logicArVolumeSiPMChip, "ArVolumeSiPM", logicArVolume, false, 1, checkOverlaps);
-		physArLightGuideSet[strid] = new G4PVPlacement(0, XYPos, logicLightGuide, "LightGuide", logicArVolume, false, 0, checkOverlaps);
+		physArVolumeSiPMSet[0][strid] = new G4PVPlacement(0, G4ThreeVector(0, 0, fLightGuideLength / 2 + 3 * mm) + XYPos, logicArVolumeSiPMChip, "ArVolumeSiPM", logicArVolume, false, 0, checkOverlaps);
+		physArVolumeSiPMSet[1][strid] = new G4PVPlacement(0, G4ThreeVector(0, 0, -fLightGuideLength / 2 - 3 * mm) + XYPos, logicArVolumeSiPMChip, "ArVolumeSiPM", logicArVolume, false, 1, checkOverlaps);
+		//physArLightGuideSet[strid] = new G4PVPlacement(0, XYPos, logicLightGuide, "LightGuide", logicArVolume, false, 0, checkOverlaps);
+		ConstructHexLightFiberArray(logicArVolume, XYPos, LightGuideRadius);
+		//ConstructLightFiberArray(logicArVolume, XYPos, LightGuideRadius);
 	}
 
 	//=============================================================//

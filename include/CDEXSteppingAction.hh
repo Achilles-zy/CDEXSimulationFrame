@@ -24,6 +24,9 @@ public:
 
   void UserSteppingAction(const G4Step *);
   inline G4double GetEfficiency(G4double wavelength);
+  inline G4double GetPMTEfficiency(G4double wavelength);
+  inline G4double GetSiPMEfficiency(G4double wavelength);
+
 
   G4int GetParticleIntType(G4String name)
   {
@@ -81,6 +84,10 @@ public:
     return creatorprocesstype;
   }
 
+    G4double SiPMWavelength[89];
+    G4double SiPMEffciency[89];
+    G4double PMTWavelength[108];
+    G4double PMTEffciency[108];
 private:
   CDEXTrackingAction *CDEXTrack;
   CDEXEventAction *CDEXEvent;

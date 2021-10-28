@@ -95,6 +95,7 @@ public:
     //CDEX Light Fiber Veto System Design
     G4VPhysicalVolume *ConstructBucketFiberSystem();
     G4LogicalVolume *ConstructLightFiber(G4double length);
+
     G4LogicalVolume *ConstructFiberBucket();
     G4LogicalVolume *ConstructFiberSiPM();
     G4LogicalVolume *ConstructArVolumeSiPM(G4double radius);
@@ -115,7 +116,7 @@ public:
         return MPT_Ar;
     }
     void ConstructLightFiberArray(G4LogicalVolume *motherLV, G4ThreeVector pos, G4double radius);
-
+    void ConstructHexLightFiberArray(G4LogicalVolume *motherLV, G4ThreeVector pos, G4double radius);
     void DefineMat();
 
     void SetPENABS(G4double);
@@ -253,6 +254,7 @@ public:
 
     void SetArYieldRatio(G4double yieldratio);
     void SetArAbsLength(G4double abslength);
+
 
 
     G4double GetArYieldRatio()
@@ -406,6 +408,7 @@ private:
     G4String fConfine;
     G4String fRunInfo;
     G4String fMode;
+    G4String fFiberShape;
     G4int fPENPropertiesID;
     G4int fUnitNb;
     G4ThreeVector fWirePos;
@@ -446,6 +449,7 @@ private:
     G4double fLightGuideLength;
     G4double fArYieldRatio;
     G4double fArAbsLength;
+
 
   
     G4ThreeVector fFiberPlacementCenter;
