@@ -2886,12 +2886,13 @@ G4LogicalVolume *CDEXDetectorConstruction::ConstructHexLightGuide(G4double lengt
 
 	G4TwoVector offsetA(0, 0), offsetB(0, 0);
 	G4double scaleA = 1, scaleB = 1;
+	G4VSolid *Extruded = new G4ExtrudedSolid("Extruded", Polygon0, length / 2 + 0.2 * mm, offsetA, scaleA, offsetB, scaleB);
 	G4VSolid *Extruded0 = new G4ExtrudedSolid("Extruded0", Polygon0, length / 2, offsetA, scaleA, offsetB, scaleB);
 	G4VSolid *Extruded1 = new G4ExtrudedSolid("Extruded1", Polygon1, length / 2 + 0.1 * mm, offsetA, scaleA, offsetB, scaleB);
 	G4VSolid *Extruded2 = new G4ExtrudedSolid("Extruded2", Polygon2, length / 2 + 0.2 * mm, offsetA, scaleA, offsetB, scaleB);
 	G4VSolid *Extruded3 = new G4ExtrudedSolid("Extruded3", Polygon3, length / 2 + 0.3 * mm, offsetA, scaleA, offsetB, scaleB); // Small values make sure the tube is open
 
-	auto solidLightGuide = new G4SubtractionSolid("solidLightGuide", Extruded0, Extruded3);
+	auto solidLightGuide = new G4SubtractionSolid("solidLightGuide", Extruded, Extruded3);
 	auto solidLightGuideOuterTPB = new G4SubtractionSolid("solidLightGuide", Extruded0, Extruded1);
 	auto solidLightGuideReflector = new G4SubtractionSolid("solidLightGuide", Extruded1, Extruded2);
 	auto solidLightGuideInnerTPB = new G4SubtractionSolid("solidLightGuide", Extruded2, Extruded3);

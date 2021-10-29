@@ -61,9 +61,9 @@ G4ClassificationOfNewTrack CDEXStackingAction::ClassifyNewTrack(const G4Track* t
     }
     // put radioactive secondaries into stacks
     //
-    
-    if (charge > 2. && track->GetParticleDefinition()->GetPDGEncoding() % 10 == 0) {
-        // if no fullchain kill track else put ions to waiting stack      
+    G4String ParticleName=track->GetParticleDefinition()->GetParticleName();
+    if (charge > 2. && track->GetParticleDefinition()->GetPDGEncoding() % 10 == 0&&ParticleName!="Po212") {
+        // if no fullchain kill track else put ions to waiting stack 
         if (!fFullChain) {
             return fKill;
         }

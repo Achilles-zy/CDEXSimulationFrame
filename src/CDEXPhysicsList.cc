@@ -459,7 +459,7 @@ CDEXPhysicsList::CDEXPhysicsList() : G4VModularPhysicsList()
 
     //Customized Physics
     RegisterPhysics(new CDEXTritiumPhysics());
-    RegisterPhysics(new CDEXOpticalPhysics());
+    //RegisterPhysics(new CDEXOpticalPhysics());
     //RegisterPhysics(new G4OpticalPhysics());
 
     // Add biasing to physical list
