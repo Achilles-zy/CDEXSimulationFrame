@@ -100,6 +100,8 @@ public:
     G4LogicalVolume *ConstructFiberSiPM();
     G4LogicalVolume *ConstructArVolumeSiPM(G4double radius);
     G4LogicalVolume *ConstructArVolumeHexSiPM(G4double circumradius);
+    G4LogicalVolume *ConstructArVolumeReflector(G4double radius);
+    G4LogicalVolume *ConstructArVolumeHexReflector(G4double circumradius);
 
     G4VPhysicalVolume *ConstructBucketLightGuideSystem();
     G4LogicalVolume *ConstructLightGuideBucket();
@@ -224,7 +226,17 @@ public:
     {
         return fBucketHeight;
     }
+    
+    G4double GetContainerOuterRadius()
+    {
+        return fArContainerRadius;
+    }
 
+    G4double GetContainerHeight()
+    {
+        return fArContainerHeight;
+    }
+    
     G4double GetSmallestUnitHeight()
     {
         return fSmallestUnitHeight;

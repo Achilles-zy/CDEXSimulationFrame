@@ -98,6 +98,30 @@ void CDEXPrimaryGeneratorAction::GeneratePrimaries(G4Event *anEvent)
 			fCDEXGPS->GetCurrentSource()->GetPosDist()->SetCentreCoords(G4ThreeVector(0, 0, 0));
 			fCDEXGPS->GetCurrentSource()->GetPosDist()->ConfineSourceToVolume("CuShield");
 		}
+		if (fSrcType == "CuContainer")
+		{
+			G4ThreeVector CentCoord;
+			G4double zCoord;
+			G4double ContainerHeight = fDetCons->GetContainerHeight();
+			G4double ContainerRadius = fDetCons->GetContainerOuterRadius();
+
+			if (G4RunManager::GetRunManager()->GetRunManagerType() == 1)
+			{
+				G4cout << "==========================Primary Info==========================" << G4endl;
+				G4cout << "Sample Region Radius: " << ContainerRadius << G4endl;
+				G4cout << "Sample Region Height: " << ContainerHeight << G4endl;
+				G4cout << "================================================================" << G4endl;
+			}
+
+			fCDEXGPS->GetCurrentSource()->GetEneDist()->SetEnergyDisType("Mono");
+			fCDEXGPS->GetCurrentSource()->GetAngDist()->SetAngDistType("iso");
+			fCDEXGPS->GetCurrentSource()->GetPosDist()->SetPosDisType("Volume");
+			fCDEXGPS->GetCurrentSource()->GetPosDist()->SetPosDisShape("Cylinder");
+			//fCDEXGPS->GetCurrentSource()->GetPosDist()->SetRadius(BucketRadius * 1.1);
+			fCDEXGPS->GetCurrentSource()->GetPosDist()->SetRadius(ContainerRadius * 1.1);
+			fCDEXGPS->GetCurrentSource()->GetPosDist()->SetHalfZ(ContainerHeight / 2);
+			fCDEXGPS->GetCurrentSource()->GetPosDist()->ConfineSourceToVolume("Wall");
+		}
 		else
 		{
 			G4cout << "Error: Src type not found! Using Geant4 default settings." << G4endl;
@@ -130,6 +154,31 @@ void CDEXPrimaryGeneratorAction::GeneratePrimaries(G4Event *anEvent)
 			fCDEXGPS->GetCurrentSource()->GetPosDist()->SetRadius(BucketRadius * 1.1);
 			fCDEXGPS->GetCurrentSource()->GetPosDist()->SetHalfZ(BucketHeight / 2);
 			fCDEXGPS->GetCurrentSource()->GetPosDist()->ConfineSourceToVolume("Bucket");
+		}
+
+		if (fSrcType == "CuContainer")
+		{
+			G4ThreeVector CentCoord;
+			G4double zCoord;
+			G4double ContainerHeight = fDetCons->GetContainerHeight();
+			G4double ContainerRadius = fDetCons->GetContainerOuterRadius();
+
+			if (G4RunManager::GetRunManager()->GetRunManagerType() == 1)
+			{
+				G4cout << "==========================Primary Info==========================" << G4endl;
+				G4cout << "Sample Region Radius: " << ContainerRadius << G4endl;
+				G4cout << "Sample Region Height: " << ContainerHeight << G4endl;
+				G4cout << "================================================================" << G4endl;
+			}
+
+			fCDEXGPS->GetCurrentSource()->GetEneDist()->SetEnergyDisType("Mono");
+			fCDEXGPS->GetCurrentSource()->GetAngDist()->SetAngDistType("iso");
+			fCDEXGPS->GetCurrentSource()->GetPosDist()->SetPosDisType("Volume");
+			fCDEXGPS->GetCurrentSource()->GetPosDist()->SetPosDisShape("Cylinder");
+			//fCDEXGPS->GetCurrentSource()->GetPosDist()->SetRadius(BucketRadius * 1.1);
+			fCDEXGPS->GetCurrentSource()->GetPosDist()->SetRadius(ContainerRadius * 1.1);
+			fCDEXGPS->GetCurrentSource()->GetPosDist()->SetHalfZ(ContainerHeight / 2);
+			fCDEXGPS->GetCurrentSource()->GetPosDist()->ConfineSourceToVolume("Wall");
 		}
 
 		else if (fSrcType == "ArVolume")

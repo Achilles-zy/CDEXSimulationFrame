@@ -64,6 +64,8 @@ set(CDEXSimulationFrame_SCRIPTS
   batch-Wire.mac
   batch-ArExpAbs.mac
   batch-ArParaTest-Wire.mac
+  batch-ArParaTest-ArVolume.mac
+  batch-CuContainerBkg.mac
   src1.mac
   )
 
