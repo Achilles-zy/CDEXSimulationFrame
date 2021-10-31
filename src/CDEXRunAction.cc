@@ -145,6 +145,7 @@ CDEXRunAction::CDEXRunAction(CDEXPrimaryGeneratorAction *gen, CDEXDetectorConstr
 		analysisManager->FinishNtuple(1);
 
 		analysisManager->CreateNtuple("Edep", "Edep in Bulk"); //Bulk events that deposit energy in Ar
+		analysisManager->CreateNtupleIColumn(2, "IfVetoDetected");
 		for (G4int i = 0; i <= DETNUMBER; i++)
 		{
 			analysisManager->CreateNtupleDColumn(2, "Det" + std::to_string(i));

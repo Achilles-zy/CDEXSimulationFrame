@@ -46,7 +46,7 @@ public:
   
 private:
   G4double EdepBulk;
-  G4double EdepBulkDet[DETNUMBER];
+  G4double EdepBulkDet[DETNUMBER+1];
   G4int SiPMPhotonCount[500][5];
   G4int SiPMSignalCount[500][5];
   G4int RowNb;

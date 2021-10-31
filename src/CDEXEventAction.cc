@@ -1,4 +1,4 @@
-//CDEXEventAction.cc
+// CDEXEventAction.cc
 #include <string.h>
 #include "CDEXEventAction.hh"
 #include "CDEXRunAction.hh"
@@ -26,15 +26,15 @@ CDEXEventAction::CDEXEventAction(CDEXRunAction *runaction, CDEXDetectorConstruct
 	  ifROI(false),
 	  run(runaction),
 	  CDEXCons(detcons)
-//ResultFile("Distribution_Results_NTuple.root","RECREATE"),
-//Distribution_Results("Distribution_Results","Distribution_Results")
+// ResultFile("Distribution_Results_NTuple.root","RECREATE"),
+// Distribution_Results("Distribution_Results","Distribution_Results")
 {
 	SignalSiPMCount = 0;
-	SiPMVetoThreshold=1;
-	SiPMVetoThreshold1=2;
-	SiPMVetoThreshold2=3;
-	SiPMVetoThreshold3=4;
-	SiPMVetoThreshold4=5;
+	SiPMVetoThreshold = 1;
+	SiPMVetoThreshold1 = 2;
+	SiPMVetoThreshold2 = 3;
+	SiPMVetoThreshold3 = 4;
+	SiPMVetoThreshold4 = 5;
 	EnergyThreshold = 160 * eV;
 	DepositeID = 0;
 	fEventID = 0;
@@ -47,8 +47,8 @@ CDEXEventAction::CDEXEventAction(CDEXRunAction *runaction, CDEXDetectorConstruct
 
 CDEXEventAction::~CDEXEventAction()
 {
-	//Distribution_Results.Write();
-	//ResultFile.Close();
+	// Distribution_Results.Write();
+	// ResultFile.Close();
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -67,7 +67,6 @@ void CDEXEventAction::BeginOfEventAction(const G4Event *evt)
 		TotalSiPMPhotonCount = 0;
 		SignalSiPMCount = 0;
 
-
 		ifBulk = false;
 		ifROI = false;
 		ifDetectable = false;
@@ -78,7 +77,7 @@ void CDEXEventAction::BeginOfEventAction(const G4Event *evt)
 		TempPosList.clear();
 		TempPosListInScintillator.clear();
 	}
-	else if (CDEXCons->GetMode() == "CDEXFiberBucketSetup" || CDEXCons->GetMode() == "CDEXLightGuideBucketSetup"|| CDEXCons->GetMode() == "CDEXArParametersTest")
+	else if (CDEXCons->GetMode() == "CDEXFiberBucketSetup" || CDEXCons->GetMode() == "CDEXLightGuideBucketSetup" || CDEXCons->GetMode() == "CDEXArParametersTest")
 	{
 		EdepBulk = 0;
 		memset(EdepBulkDet, 0, sizeof(EdepBulkDet));
@@ -90,7 +89,7 @@ void CDEXEventAction::BeginOfEventAction(const G4Event *evt)
 		Total = 0;
 		TotalSiPMPhotonCount = 0;
 		SiPMSignalCnt = 0;
-		SignalSiPMCount=0;
+		SignalSiPMCount = 0;
 
 		ifBulk = false;
 		ifROI = false;
@@ -115,9 +114,9 @@ void CDEXEventAction::EndOfEventAction(const G4Event *evt)
 		analysisManager->FillNtupleDColumn(3, 0, EdepBulk);
 		analysisManager->AddNtupleRow(3);
 
-		//Accurate but slow
-		//GetEdepStatus();
-		//Not Accurate
+		// Accurate but slow
+		// GetEdepStatus();
+		// Not Accurate
 		if (EdepBulk > 160 * eV)
 		{
 			ifBulk = true;
@@ -172,20 +171,30 @@ void CDEXEventAction::EndOfEventAction(const G4Event *evt)
 			}
 		}
 	}
-	if (CDEXCons->GetMode() == "CDEXFiberBucketSetup" || CDEXCons->GetMode() == "CDEXLightGuideBucketSetup"|| CDEXCons->GetMode() == "CDEXArParametersTest")
+	if (CDEXCons->GetMode() == "CDEXFiberBucketSetup" || CDEXCons->GetMode() == "CDEXLightGuideBucketSetup" || CDEXCons->GetMode() == "CDEXArParametersTest")
 	{
 		auto analysisManager = G4AnalysisManager::Instance();
-		analysisManager->FillNtupleDColumn(2, 0, EdepBulk);
+		if (SignalSiPMCount >= SiPMVetoThreshold)
+		{
+			analysisManager->FillNtupleIColumn(2, 0, 1);
+		}
+		else
+		{
+			analysisManager->FillNtupleIColumn(2, 0, 0);
+		}
+		analysisManager->FillNtupleDColumn(2, 1, EdepBulk);
 		for (G4int i = 0; i < DETNUMBER; i++)
 		{
-			analysisManager->FillNtupleDColumn(2, i + 1, EdepBulkDet[i]);
+			analysisManager->FillNtupleDColumn(2, i + 2, EdepBulkDet[i]);
 		}
+
+
 		analysisManager->AddNtupleRow(2);
 
-		//Accurate but slow method:
-		//GetEdepStatus();
+		// Accurate but slow method:
+		// GetEdepStatus();
 
-		//Not accurate:
+		// Not accurate:
 		if (EdepBulk > 160 * eV)
 		{
 			ifBulk = true;
@@ -276,7 +285,9 @@ void CDEXEventAction::AddBulkEnergy(G4double de)
 
 void CDEXEventAction::AddBulkEnergyDet(G4double de, G4int DetID)
 {
-	EdepBulkDet[DetID] += de;
+	if(DetID<DETNUMBER){
+		EdepBulkDet[DetID] += de;
+	}
 }
 
 void CDEXEventAction::AddToSiPM(G4int i, G4int j)

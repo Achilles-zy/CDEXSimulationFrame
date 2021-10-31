@@ -197,7 +197,7 @@ void CDEXSteppingAction::UserSteppingAction(const G4Step *aStep)
 		G4int SiPMSignalCnt = CDEXEvent->GetSiPMSignalCnt();
 		G4int SignalSiPMCount = CDEXEvent->GetSignalSiPMCount();
 		// if (SiPMSignalCnt>1&&ParticleName=="opticalphoton"){
-		if (SignalSiPMCount >= 2 && ParticleName == "opticalphoton")
+		if (SignalSiPMCount >= 4 && ParticleName == "opticalphoton")
 		{
 			aStep->GetTrack()->SetTrackStatus(fStopAndKill);
 		}
@@ -224,6 +224,7 @@ void CDEXSteppingAction::UserSteppingAction(const G4Step *aStep)
 				analysisManager->FillNtupleDColumn(1, 6, CurrentWL);
 				analysisManager->AddNtupleRow(1);
 				G4double SiPMEff = GetSiPMEfficiency(CurrentWL);
+				//G4cout<<"WL:"<<CurrentWL<<"Eff:"<< SiPMEff<<G4endl;
 				G4double rnd = G4UniformRand();
 				if (rnd < SiPMEff)
 				{
