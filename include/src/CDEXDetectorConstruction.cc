@@ -1064,10 +1064,10 @@ G4LogicalVolume *CDEXDetectorConstruction::ConstructA2(G4double WireLength)
 	G4Tubs *solidOuterJacket = new G4Tubs("solidOuterJacket", BraidRadius, WireRadius, WireLength / 2, 0, twopi);
 	G4LogicalVolume *logicOuterJacket = new G4LogicalVolume(solidOuterJacket, JacketMat, "logicOuterJacket");
 
-	G4PVPlacement *physConductor = new G4PVPlacement(0, G4ThreeVector(), logicConductor, "Wire", logicWire, false, 0, CheckOverlaps);
-	G4PVPlacement *physJacket = new G4PVPlacement(0, G4ThreeVector(), logicJacket, "Wire", logicWire, false, 0, CheckOverlaps);
-	G4PVPlacement *physBraid = new G4PVPlacement(0, G4ThreeVector(), logicBraid, "Wire", logicWire, false, 0, CheckOverlaps);
-	G4PVPlacement *physOuterJacket = new G4PVPlacement(0, G4ThreeVector(), logicOuterJacket, "Wire", logicWire, false, 0, CheckOverlaps);
+	G4PVPlacement *physConductor = new G4PVPlacement(0, G4ThreeVector(), logicConductor, "Conductor", logicWire, false, 0, CheckOverlaps);
+	G4PVPlacement *physJacket = new G4PVPlacement(0, G4ThreeVector(), logicJacket, "Jacket", logicWire, false, 0, CheckOverlaps);
+	G4PVPlacement *physBraid = new G4PVPlacement(0, G4ThreeVector(), logicBraid, "Braid", logicWire, false, 0, CheckOverlaps);
+	G4PVPlacement *physOuterJacket = new G4PVPlacement(0, G4ThreeVector(), logicOuterJacket, "OuterJacket", logicWire, false, 0, CheckOverlaps);
 
 	return logicWire;
 }
@@ -2835,15 +2835,15 @@ G4LogicalVolume *CDEXDetectorConstruction::ConstructRecLightGuide(G4double lengt
 	G4OpticalSurface *LightGuideCore_Surf = new G4OpticalSurface("LightGuideCore_Surf", glisur, polished, dielectric_dielectric);
 	G4LogicalSkinSurface *LightGuideCore_Surf_LSS = new G4LogicalSkinSurface("LightGuideCore_Surf_LSS", logicLightGuideCoreVolume, LightGuideCore_Surf);
 
-	auto physLightGuideInnerTPB = new G4PVPlacement(0, G4ThreeVector(), logicLightGuideInnerTPB, "LightGuide", logicLightGuide, false, 0, CheckOverlaps);
+	auto physLightGuideInnerTPB = new G4PVPlacement(0, G4ThreeVector(), logicLightGuideInnerTPB, "LightGuideInnerTPB", logicLightGuide, false, 0, CheckOverlaps);
 	// G4PVPlacement *physLightGuideInnerTPBArray[400] = {nullptr};
 	// for(G4int i=0;i<100;i++){
 	// 	physLightGuideInnerTPBArray[i*2] = new G4PVPlacement(0, G4ThreeVector(0,0,3*i*cm), logicLightGuideInnerTPB, "LightGuideInnerTPB", logicLightGuide, false, 0, CheckOverlaps);
 	// 	physLightGuideInnerTPBArray[i*2+1] = new G4PVPlacement(0, G4ThreeVector(0,0,-3*i*cm), logicLightGuideInnerTPB, "LightGuideInnerTPB", logicLightGuide, false, 0, CheckOverlaps);
 	// }
 	// auto physLightGuideOuterTPB = new G4PVPlacement(0, G4ThreeVector(), logicLightGuideOuterTPB, "LightGuideOuterTPB", logicLightGuide, false, 0, CheckOverlaps);
-	auto physLightGuideReflector = new G4PVPlacement(0, G4ThreeVector(), logicLightGuideReflector, "LightGuide", logicLightGuide, false, 0, CheckOverlaps);
-	auto physLightGuideCoreVolume = new G4PVPlacement(0, G4ThreeVector(), logicLightGuideCoreVolume, "LightGuide", logicLightGuide, false, 0, CheckOverlaps);
+	auto physLightGuideReflector = new G4PVPlacement(0, G4ThreeVector(), logicLightGuideReflector, "LightGuideReflector", logicLightGuide, false, 0, CheckOverlaps);
+	auto physLightGuideCoreVolume = new G4PVPlacement(0, G4ThreeVector(), logicLightGuideCoreVolume, "LightGuideCoreVolume", logicLightGuide, false, 0, CheckOverlaps);
 	// auto physLightGuideInnerLayer = new G4PVPlacement(0, G4ThreeVector(), logicLightGuideInnerLayer, "LightGuideInnerLayer", logicLightGuide, false, 0, CheckOverlaps);
 	//  G4PVPlacement *physLightGuideInnerLayerArray[400] = {nullptr};
 	//  for(G4int i=0;i<100;i++){
@@ -2932,9 +2932,9 @@ G4LogicalVolume *CDEXDetectorConstruction::ConstructHexLightGuide(G4double lengt
 	// LightGuideReflector_Surf->SetMaterialPropertiesTable(FiberRef_Surf_MPT);
 	G4LogicalSkinSurface *LightGuideReflector_Surf_LSS = new G4LogicalSkinSurface("LightGuideReflector_Surf_LSS", logicLightGuideReflector, LightGuideReflector_Surf);
 
-	auto physLightGuideInnerTPB = new G4PVPlacement(0, G4ThreeVector(), logicLightGuideInnerTPB, "LightGuide", logicLightGuide, false, 0, CheckOverlaps);
-	auto physLightGuideOuterTPB = new G4PVPlacement(0, G4ThreeVector(), logicLightGuideOuterTPB, "LightGuide", logicLightGuide, false, 0, CheckOverlaps);
-	auto physLightGuideReflector = new G4PVPlacement(0, G4ThreeVector(), logicLightGuideReflector, "LightGuide", logicLightGuide, false, 0, CheckOverlaps);
+	auto physLightGuideInnerTPB = new G4PVPlacement(0, G4ThreeVector(), logicLightGuideInnerTPB, "LightGuideInnerTPB", logicLightGuide, false, 0, CheckOverlaps);
+	auto physLightGuideOuterTPB = new G4PVPlacement(0, G4ThreeVector(), logicLightGuideOuterTPB, "LightGuideOuterTPB", logicLightGuide, false, 0, CheckOverlaps);
+	auto physLightGuideReflector = new G4PVPlacement(0, G4ThreeVector(), logicLightGuideReflector, "LightGuideReflector", logicLightGuide, false, 0, CheckOverlaps);
 	// auto physLightGuideCoreVolume = new G4PVPlacement(0, G4ThreeVector(), logicLightGuideCoreVolume, "LightGuideCoreVolume", logicLightGuide, false, 0, CheckOverlaps);
 	G4LogicalBorderSurface *LightGuideCore_Surf1_LBS = new G4LogicalBorderSurface("LightGuideCore_Surf_LBS", physLightGuideInnerTPB, physLightGuideReflector, LightGuideReflector_Surf);
 	G4LogicalBorderSurface *LightGuideCore_Surf2_LBS = new G4LogicalBorderSurface("LightGuideCore_Surf_LBS", physLightGuideReflector, physLightGuideInnerTPB, LightGuideReflector_Surf);
