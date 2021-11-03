@@ -1,0 +1,201 @@
+
+#Radioactive decay simulation
+/control/verbose 0
+/control/saveHistory
+/run/verbose 0
+#
+# Change the default number of threads (in multi-threaded mode)
+/run/numberOfThreads 60
+#
+
+/CDEX/sim/set/mode CDEXArParametersTest
+/CDEX/src/type CuContainer
+/CDEX/run/refresh true
+
+# Initialize kernel
+/run/initialize
+
+#########################
+/CDEX/cons/set/arabsyieldratio 0.3
+/CDEX/cons/set/arabslength 60 cm
+
+#ROI
+#U Chain
+#Bi214
+/gps/particle ion
+/gps/ion 83 214 0 0
+/gps/energy 0 keV
+/run/beamOn 50000000
+
+#Th Chain
+#Tl208
+/gps/particle ion
+/gps/ion 81 208 0 0
+/gps/energy 0 keV
+/run/beamOn 50000000
+
+#Ac228
+/gps/particle ion
+/gps/ion 89 228 0 0
+/gps/energy 0 keV
+/run/beamOn 50000000
+
+#Bi212
+/gps/particle ion
+/gps/ion 83 212 0 0
+/gps/energy 0 keV
+/run/beamOn 50000000
+
+#Low Energy
+#Th Chain
+
+#Th232
+/gps/particle ion
+/gps/ion 90 232 0 0
+/gps/energy 0 keV
+/run/beamOn 50000000
+
+#Ra228
+/gps/particle ion
+/gps/ion 88 228 0 0
+/gps/energy 0 keV
+/run/beamOn 50000000
+
+#Th228
+/gps/particle ion
+/gps/ion 90 232 0 0
+/gps/energy 0 keV
+/run/beamOn 50000000
+
+#Ra224
+/gps/particle ion
+/gps/ion 88 224 0 0
+/gps/energy 0 keV
+/run/beamOn 50000000
+
+#Rn220
+/gps/particle ion
+/gps/ion 86 220 0 0
+/gps/energy 0 keV
+/run/beamOn 50000000
+
+#Po216
+/gps/particle ion
+/gps/ion 84 216 0 0
+/gps/energy 0 keV
+/run/beamOn 50000000
+
+#Pb212
+/gps/particle ion
+/gps/ion 82 212 0 0
+/gps/energy 0 keV
+/run/beamOn 50000000
+
+#Bi212
+/gps/particle ion
+/gps/ion 83 212 0 0
+/gps/energy 0 keV
+/run/beamOn 50000000
+
+#Pb208
+/gps/particle ion
+/gps/ion 82 208 0 0
+/gps/energy 0 keV
+/run/beamOn 50000000
+
+#U Chain
+#U238
+/gps/particle ion
+/gps/ion 82 208 0 0
+/gps/energy 0 keV
+/run/beamOn 50000000
+
+#Th234
+/gps/particle ion
+/gps/ion 90 234 0 0
+/gps/energy 0 keV
+/run/beamOn 50000000
+
+#Pa234
+/gps/particle ion
+/gps/ion 90 234 0 73.920
+/gps/energy 0 keV
+/run/beamOn 50000000
+
+#U234
+/gps/particle ion
+/gps/ion 92 234 0 0
+/gps/energy 0 keV
+/run/beamOn 50000000
+
+#Th230
+/gps/particle ion
+/gps/ion 90 230 0 0
+/gps/energy 0 keV
+/run/beamOn 50000000
+
+#Ra226
+/gps/particle ion
+/gps/ion 88 226 0 0
+/gps/energy 0 keV
+/run/beamOn 50000000
+
+#Rn222
+/gps/particle ion
+/gps/ion 86 222 0 0
+/gps/energy 0 keV
+/run/beamOn 50000000
+
+#Po218
+/gps/particle ion
+/gps/ion 84 218 0 0
+/gps/energy 0 keV
+/run/beamOn 50000000
+
+#Pb214
+/gps/particle ion
+/gps/ion 82 214 0 0
+/gps/energy 0 keV
+/run/beamOn 50000000
+
+#Bi214
+/gps/particle ion
+/gps/ion 83 214 0 0
+/gps/energy 0 keV
+/run/beamOn 50000000
+
+#Po214
+/gps/particle ion
+/gps/ion 84 214 0 0
+/gps/energy 0 keV
+/run/beamOn 50000000
+
+#Tl210
+/gps/particle ion
+/gps/ion 81 210 0 0
+/gps/energy 0 keV
+/run/beamOn 50000000
+
+#Pb210
+/gps/particle ion
+/gps/ion 82 210 0 0
+/gps/energy 0 keV
+/run/beamOn 50000000
+
+#Bi210
+/gps/particle ion
+/gps/ion 83 210 0 0
+/gps/energy 0 keV
+/run/beamOn 50000000
+
+#Po210
+/gps/particle ion
+/gps/ion 84 210 0 0
+/gps/energy 0 keV
+/run/beamOn 50000000
+
+#Pb206
+/gps/particle ion
+/gps/ion 82 206 0 0
+/gps/energy 0 keV
+/run/beamOn 50000000
