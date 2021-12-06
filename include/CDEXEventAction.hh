@@ -24,6 +24,7 @@ public:
   void EndOfEventAction(const G4Event *);
   void AddBulkEnergy(G4double E);
   void AddBulkEnergyDet(G4double E,G4int DetID);
+  void AddBulkEnergyString(G4double E,G4int StringID);
   void SiPMTrue() { ifSiPM = true; }
   void DetectableTrue() { ifDetectable = true; }
   void CountTotalSiPMPhoton(G4int ph) { TotalSiPMPhotonCount = TotalSiPMPhotonCount + ph; }
@@ -41,11 +42,23 @@ public:
 
   void RecordStepInfoInScintillator(G4int particletype, G4int creatorprocess, G4double posx, G4double posy, G4double posz, G4double edep);
   void RecordEdepInfoInScintillator(G4int particletype, G4int creatorprocess, G4double posx, G4double posy, G4double posz, G4double edep);
+  G4bool IfMultiSiteEvent(std::vector<std::vector<G4double>> edepinfo,G4double distcut,G4double Ecut);
+  G4bool IfInterDet(G4double Ecut,G4double EdepList[]);
 
+  void RecordBulkEdep(G4double x,G4double y,G4double z,G4double e){
+      std::vector<G4double> OneEdepInfo;
+      OneEdepInfo.push_back(x);
+      OneEdepInfo.push_back(y);
+      OneEdepInfo.push_back(z);
+      OneEdepInfo.push_back(e); 
+      BulkEdepInfo.push_back(OneEdepInfo);
+  }
   void GetEdepStatus();
+
   
 private:
   G4double EdepBulk;
+  G4double EdepBulkString[STRINGNUMBER+1];
   G4double EdepBulkDet[DETNUMBER+1];
   G4int SiPMPhotonCount[500][5];
   G4int SiPMSignalCount[500][5];
@@ -82,6 +95,7 @@ private:
   std::vector<std::vector<G4double>> TempPosListInScintillator;
 
   std::vector<std::vector<G4int>> TempSiPMList;
+  std::vector<std::vector<G4double>> BulkEdepInfo;
 
   CDEXRunAction *run;
   CDEXDetectorConstruction *CDEXCons;

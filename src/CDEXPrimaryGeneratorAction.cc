@@ -242,7 +242,9 @@ void CDEXPrimaryGeneratorAction::GeneratePrimaries(G4Event *anEvent)
 		{
 			G4double Radius = fDetCons->GetFiberRadius();
 			G4double Length = 4 * m;
-			G4ThreeVector FiberPos = fDetCons->GetFiberPlacementCenter() + G4ThreeVector(fDetCons->GetFiberPlacementRadius(), 0, 0);
+			G4double ContainerHeight = fDetCons->GetContainerHeight();
+			G4double ContainerRadius = fDetCons->GetContainerOuterRadius();
+			//G4ThreeVector FiberPos = fDetCons->GetFiberPlacementCenter() + G4ThreeVector(fDetCons->GetFiberPlacementRadius(), 0, 0);
 			if (G4RunManager::GetRunManager()->GetRunManagerType() == 1)
 			{
 				G4cout << "==========================Primary Info==========================" << G4endl;
@@ -254,11 +256,60 @@ void CDEXPrimaryGeneratorAction::GeneratePrimaries(G4Event *anEvent)
 			fCDEXGPS->GetCurrentSource()->GetAngDist()->SetAngDistType("iso");
 			fCDEXGPS->GetCurrentSource()->GetPosDist()->SetPosDisType("Volume");
 			fCDEXGPS->GetCurrentSource()->GetPosDist()->SetPosDisShape("Cylinder");
-			fCDEXGPS->GetCurrentSource()->GetPosDist()->SetRadius(Radius);
-			fCDEXGPS->GetCurrentSource()->GetPosDist()->SetHalfZ(Length / 2);
-			fCDEXGPS->GetCurrentSource()->GetPosDist()->SetCentreCoords(FiberPos);
-			//fCDEXGPS->GetCurrentSource()->GetPosDist()->ConfineSourceToVolume("Fiber");
+			fCDEXGPS->GetCurrentSource()->GetPosDist()->SetRadius(ContainerRadius);
+			fCDEXGPS->GetCurrentSource()->GetPosDist()->SetHalfZ(ContainerHeight / 2);
+			//fCDEXGPS->GetCurrentSource()->GetPosDist()->SetCentreCoords(FiberPos);
+			fCDEXGPS->GetCurrentSource()->GetPosDist()->ConfineSourceToVolume("Fiber");
 		}
+
+		else if (fSrcType == "LightGuide")
+		{
+			G4double Radius = fDetCons->GetFiberRadius();
+			G4double Length = 4 * m;
+			G4double ContainerHeight = fDetCons->GetContainerHeight();
+			G4double ContainerRadius = fDetCons->GetContainerOuterRadius();
+			//G4ThreeVector FiberPos = fDetCons->GetFiberPlacementCenter() + G4ThreeVector(fDetCons->GetFiberPlacementRadius(), 0, 0);
+			if (G4RunManager::GetRunManager()->GetRunManagerType() == 1)
+			{
+				G4cout << "==========================Primary Info==========================" << G4endl;
+				G4cout << "Sample Region Radius: " << Radius << G4endl;
+				G4cout << "Sample Region Length: " << Length << G4endl;
+				G4cout << "================================================================" << G4endl;
+			}
+			fCDEXGPS->GetCurrentSource()->GetEneDist()->SetEnergyDisType("Mono");
+			fCDEXGPS->GetCurrentSource()->GetAngDist()->SetAngDistType("iso");
+			fCDEXGPS->GetCurrentSource()->GetPosDist()->SetPosDisType("Volume");
+			fCDEXGPS->GetCurrentSource()->GetPosDist()->SetPosDisShape("Cylinder");
+			fCDEXGPS->GetCurrentSource()->GetPosDist()->SetRadius(ContainerRadius);
+			fCDEXGPS->GetCurrentSource()->GetPosDist()->SetHalfZ(ContainerHeight / 2);
+			//fCDEXGPS->GetCurrentSource()->GetPosDist()->SetCentreCoords(FiberPos);
+			fCDEXGPS->GetCurrentSource()->GetPosDist()->ConfineSourceToVolume("LightGuide");
+		}
+
+		else if (fSrcType == "ArLightReadout")
+		{
+			G4double Radius = fDetCons->GetFiberRadius();
+			G4double Length = 4 * m;
+			G4double ContainerHeight = fDetCons->GetContainerHeight();
+			G4double ContainerRadius = fDetCons->GetContainerOuterRadius();
+			//G4ThreeVector FiberPos = fDetCons->GetFiberPlacementCenter() + G4ThreeVector(fDetCons->GetFiberPlacementRadius(), 0, 0);
+			if (G4RunManager::GetRunManager()->GetRunManagerType() == 1)
+			{
+				G4cout << "==========================Primary Info==========================" << G4endl;
+				G4cout << "Sample Region Radius: " << Radius << G4endl;
+				G4cout << "Sample Region Length: " << Length << G4endl;
+				G4cout << "================================================================" << G4endl;
+			}
+			fCDEXGPS->GetCurrentSource()->GetEneDist()->SetEnergyDisType("Mono");
+			fCDEXGPS->GetCurrentSource()->GetAngDist()->SetAngDistType("iso");
+			fCDEXGPS->GetCurrentSource()->GetPosDist()->SetPosDisType("Volume");
+			fCDEXGPS->GetCurrentSource()->GetPosDist()->SetPosDisShape("Cylinder");
+			fCDEXGPS->GetCurrentSource()->GetPosDist()->SetRadius(ContainerRadius);
+			fCDEXGPS->GetCurrentSource()->GetPosDist()->SetHalfZ(ContainerHeight / 2);
+			//fCDEXGPS->GetCurrentSource()->GetPosDist()->SetCentreCoords(FiberPos);
+			fCDEXGPS->GetCurrentSource()->GetPosDist()->ConfineSourceToVolume("LightGuide");
+		}
+
 
 		else if (fSrcType == "SingleASIC")
 		{

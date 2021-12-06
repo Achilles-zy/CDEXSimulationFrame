@@ -735,20 +735,6 @@ void CDEXDetectorConstruction::DefineMat()
 	G4double PPCKOVLowE = LambdaE / (650 * nanometer);
 	G4double de = ((PPCKOVHighE - PPCKOVLowE) / ((G4double)(NUMENTRIES - 1)));
 
-	// liquid argon (LAr)
-	G4double LAr_PPCK[(NUMENTRIES)] = {0};
-	G4double LAr_RAYL[(NUMENTRIES)] = {0};
-
-	for (ji = 0; ji < NUMENTRIES; ji++)
-	{
-		e = PPCKOVLowE + ((G4double)ji) * de;
-		LAr_PPCK[ji] = e;
-		// G4double b= LArRayLength((LambdaE / e), temp);
-		// G4double T = temp;
-		LAr_RAYL[ji] = 66 * cm;
-	}
-
-	// matLAr->GetMaterialPropertiesTable()->AddProperty("RAYLEIGH", LAr_PPCK, LAr_RAYL, NUMENTRIES);
 }
 
 void CDEXDetectorConstruction::SetPENABS(G4double value)
@@ -4681,6 +4667,11 @@ G4VPhysicalVolume *CDEXDetectorConstruction::ConstructBucketLightGuideSystem()
 
 	auto physLArContainer = new G4PVPlacement(rotLArContainer, G4ThreeVector(), logicLArContainer, "Container", logicEnv, false, 0, checkOverlaps);
 
+	// G4double ShieldThickness=2*cm;
+	// G4Tubs* solidShield=new  G4Tubs("solidShield", 0.6 *m-ShieldThickness, 0.6 *m, fArContainerHeight / 2, 0., twopi);
+	// auto logicShield = new G4LogicalVolume(solidShield, matCu, "logicShield");
+	// auto physShield = new G4PVPlacement(0, G4ThreeVector(), logicShield, "Shield", logicArVolume, false, 0, checkOverlaps);
+
 	//=============================================================//
 	//                            Shell                            //
 	//=============================================================//
@@ -4767,7 +4758,7 @@ G4VPhysicalVolume *CDEXDetectorConstruction::ConstructBucketLightGuideSystem()
 		for (G4int i = 0; i < fUnitNb; i++)
 		{
 			G4ThreeVector PosUnit = G4ThreeVector(0, 0, (SmallestUnitHeight / 2 + SmallestUnitHeight * ceil(i / 2)) * pow(-1, i)) + XYPos;
-			physPackedBEGe[i][strid] = new G4PVPlacement(RotBEGe, PosUnit + PosBEGe, logicShell, "PackedBEGe", logicArVolume, false, 0, checkOverlaps);
+			physPackedBEGe[i][strid] = new G4PVPlacement(RotBEGe, PosUnit + PosBEGe, logicShell, "PackedBEGe", logicArVolume, false, strid*fUnitNb+i, checkOverlaps);
 			physWire[i][strid] = new G4PVPlacement(RotWire, PosUnit + PosWire, logicWire, "Wire", logicArVolume, false, 0, checkOverlaps);
 			physASIC[i][strid] = new G4PVPlacement(RotASIC, PosUnit + PosASIC, logicASICPlate, "ASIC", logicArVolume, false, 0, checkOverlaps);
 		}

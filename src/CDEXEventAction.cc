@@ -60,6 +60,7 @@ void CDEXEventAction::BeginOfEventAction(const G4Event *evt)
 	{
 		EdepBulk = 0;
 		memset(EdepBulkDet, 0, sizeof(EdepBulkDet));
+		memset(EdepBulkString, 0, sizeof(EdepBulkString));
 		memset(SiPMPhotonCount, 0, sizeof(SiPMPhotonCount));
 		memset(SiPMSignalCount, 0, sizeof(SiPMPhotonCount));
 
@@ -85,7 +86,7 @@ void CDEXEventAction::BeginOfEventAction(const G4Event *evt)
 		memset(SiPMSignalCount, 0, sizeof(SiPMPhotonCount));
 
 		TempSiPMList.clear();
-
+		BulkEdepInfo.clear();
 		Total = 0;
 		TotalSiPMPhotonCount = 0;
 		SiPMSignalCnt = 0;
@@ -107,7 +108,7 @@ void CDEXEventAction::EndOfEventAction(const G4Event *evt)
 	{
 		G4cout << fEventID << G4endl;
 	}
-
+	// G4cout<<"ID:"<<fEventID<<" E:"<<EdepBulk<<G4endl;
 	if (CDEXCons->GetMode() == "CDEX300")
 	{
 		auto analysisManager = G4AnalysisManager::Instance();
@@ -174,22 +175,6 @@ void CDEXEventAction::EndOfEventAction(const G4Event *evt)
 	if (CDEXCons->GetMode() == "CDEXFiberBucketSetup" || CDEXCons->GetMode() == "CDEXLightGuideBucketSetup" || CDEXCons->GetMode() == "CDEXArParametersTest")
 	{
 		auto analysisManager = G4AnalysisManager::Instance();
-		if (SignalSiPMCount >= SiPMVetoThreshold)
-		{
-			analysisManager->FillNtupleIColumn(2, 0, 1);
-		}
-		else
-		{
-			analysisManager->FillNtupleIColumn(2, 0, 0);
-		}
-		analysisManager->FillNtupleDColumn(2, 1, EdepBulk);
-		for (G4int i = 0; i < DETNUMBER; i++)
-		{
-			analysisManager->FillNtupleDColumn(2, i + 2, EdepBulkDet[i]);
-		}
-
-
-		analysisManager->AddNtupleRow(2);
 
 		// Accurate but slow method:
 		// GetEdepStatus();
@@ -199,6 +184,98 @@ void CDEXEventAction::EndOfEventAction(const G4Event *evt)
 		{
 			ifBulk = true;
 		}
+		if (EdepBulk > 10 * eV)
+		{
+			if (SignalSiPMCount >= SiPMVetoThreshold)
+			{
+				analysisManager->FillNtupleIColumn(2, 0, 1);
+			}
+			else
+			{
+				analysisManager->FillNtupleIColumn(2, 0, 0);
+			}
+
+			if (SignalSiPMCount >= SiPMVetoThreshold1)
+			{
+				analysisManager->FillNtupleIColumn(2, 1, 1);
+			}
+			else
+			{
+				analysisManager->FillNtupleIColumn(2, 1, 0);
+			}
+
+			if (SignalSiPMCount >= SiPMVetoThreshold2)
+			{
+				analysisManager->FillNtupleIColumn(2, 2, 1);
+			}
+			else
+			{
+				analysisManager->FillNtupleIColumn(2, 2, 0);
+			}
+
+			if (SignalSiPMCount >= SiPMVetoThreshold3)
+			{
+				analysisManager->FillNtupleIColumn(2, 3, 1);
+			}
+			else
+			{
+				analysisManager->FillNtupleIColumn(2, 3, 0);
+			}
+
+			if (IfMultiSiteEvent(BulkEdepInfo, 1 * mm, 0.9) == true)
+			{
+				analysisManager->FillNtupleIColumn(2, 4, 1);
+			}
+			else
+			{
+				analysisManager->FillNtupleIColumn(2, 4, 0);
+			}
+
+			if (IfMultiSiteEvent(BulkEdepInfo, 1 * mm, 0.8) == true)
+			{
+				analysisManager->FillNtupleIColumn(2, 5, 1);
+			}
+			else
+			{
+				analysisManager->FillNtupleIColumn(2, 5, 0);
+			}
+
+			if (IfMultiSiteEvent(BulkEdepInfo, 1 * mm, 0.7) == true)
+			{
+				analysisManager->FillNtupleIColumn(2, 6, 1);
+			}
+			else
+			{
+				analysisManager->FillNtupleIColumn(2, 6, 0);
+			}
+
+			if (IfMultiSiteEvent(BulkEdepInfo, 2 * mm, 0.7) == true)
+			{
+				analysisManager->FillNtupleIColumn(2, 7, 1);
+			}
+			else
+			{
+				analysisManager->FillNtupleIColumn(2, 7, 0);
+			}
+
+			if (IfInterDet(1 * keV, EdepBulkDet) == true)
+			{
+				analysisManager->FillNtupleIColumn(2, 8, 1);
+			}
+			else
+			{
+				analysisManager->FillNtupleIColumn(2, 8, 0);
+			}
+
+			analysisManager->FillNtupleDColumn(2, 9, EdepBulk);
+			for (G4int i = 0; i < STRINGNUMBER; i++)
+			{
+				analysisManager->FillNtupleDColumn(2, i + 10, EdepBulkString[i]);
+			}
+
+			analysisManager->AddNtupleRow(2);
+		}
+
 		if (EdepBulk > 2000 * eV && EdepBulk < 2100 * eV)
 		{
 			ifROI = true;
@@ -285,8 +362,17 @@ void CDEXEventAction::AddBulkEnergy(G4double de)
 
 void CDEXEventAction::AddBulkEnergyDet(G4double de, G4int DetID)
 {
-	if(DetID<DETNUMBER){
+	if (DetID < DETNUMBER)
+	{
 		EdepBulkDet[DetID] += de;
+	}
+}
+
+void CDEXEventAction::AddBulkEnergyString(G4double de, G4int StrID)
+{
+	if (StrID < STRINGNUMBER)
+	{
+		EdepBulkString[StrID] += de;
 	}
 }
 
@@ -332,7 +418,6 @@ void CDEXEventAction::RecordEdepInfoInScintillator(G4int particletype, G4int cre
 	StepInfo.push_back(posy);
 	StepInfo.push_back(posz);
 	StepInfo.push_back(edep);
-
 	std::vector<G4double> Pos;
 	Pos.push_back(posx);
 	Pos.push_back(posy);
@@ -373,6 +458,82 @@ void CDEXEventAction::RecordEdepInfoInScintillator(G4int particletype, G4int cre
 
 	StepInfo.clear();
 	Pos.clear();
+}
+
+G4bool CDEXEventAction::IfMultiSiteEvent(std::vector<std::vector<G4double>> edepinfo, G4double distcut, G4double Ecut)
+{
+	G4bool ifMultiSite = true;
+	std::vector<std::vector<G4double>> TempBulkEdepInfoList;
+	G4double TotalEdep = 0;
+	for (G4int j = 0; j < edepinfo.size(); j++)
+	{
+		std::vector<G4double> OneEdepInfo;
+		OneEdepInfo = edepinfo[j];
+		TotalEdep += OneEdepInfo[3];
+		if (TempBulkEdepInfoList.empty())
+		{
+			TempBulkEdepInfoList.push_back(OneEdepInfo);
+		}
+		else
+		{
+			G4bool ifNewPoint = true;
+			G4int PointID;
+			G4double MinDist = distcut;
+			for (G4int i = 0; i < TempBulkEdepInfoList.size(); i++)
+			{
+				G4double dist = GetDistance(TempBulkEdepInfoList[i][0], TempBulkEdepInfoList[i][1], TempBulkEdepInfoList[i][2], OneEdepInfo[0], OneEdepInfo[1], OneEdepInfo[2]);
+				if (dist < MinDist)
+				{
+					MinDist = dist;
+					PointID = i;
+				}
+			}
+			if (MinDist < distcut)
+			{
+				ifNewPoint = false;
+			}
+			if (ifNewPoint == true)
+			{
+				TempBulkEdepInfoList.push_back(OneEdepInfo);
+			}
+			else
+			{
+				TempBulkEdepInfoList[PointID][3] += OneEdepInfo[3];
+			}
+		}
+	}
+	for (G4int i = 0; i < TempBulkEdepInfoList.size(); i++)
+	{
+		if (TempBulkEdepInfoList[i][3] / TotalEdep > Ecut)
+		{
+			ifMultiSite = false;
+			break;
+		}
+	}
+	// if(TempBulkEdepInfoList.size()==1){
+	// 	ifSingleSite = true;
+	// }
+	// G4cout<<"F:"<<ifSingleSite<<G4endl;
+	return ifMultiSite;
+}
+
+G4bool CDEXEventAction::IfInterDet(G4double Ecut, G4double EdepList[])
+{
+	G4int SignalCount = 0;
+	G4bool ifInterDet = false;
+	G4int listlen = sizeof(EdepList) / sizeof(EdepList[0]);
+	for (G4int i = 0; i < listlen; i++)
+	{
+		if (EdepList[i] > Ecut)
+		{
+			SignalCount += 1;
+		}
+	}
+	if (SignalCount > 1)
+	{
+		ifInterDet = true;
+	}
+	return ifInterDet;
 }
 
 void CDEXEventAction::GetEdepStatus()

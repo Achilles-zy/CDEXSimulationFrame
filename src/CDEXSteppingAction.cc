@@ -181,8 +181,12 @@ void CDEXSteppingAction::UserSteppingAction(const G4Step *aStep)
 		if (volume == detectorConstruction->GetBulk())
 		{
 			G4int DetID = touchable->GetCopyNumber(2);
+			G4int UnitNumber=CDEXCons->GetUnitNumber();
+			G4int DetStrID=std::floor(DetID/(double)UnitNumber);
 			CDEXEvent->AddBulkEnergy(edep);
 			CDEXEvent->AddBulkEnergyDet(edep, DetID);
+			CDEXEvent->AddBulkEnergyString(edep, DetStrID);
+			CDEXEvent->RecordBulkEdep(PostStepPos.getX(),PostStepPos.getY(),PostStepPos.getZ(),edep);
 		}
 
 		if (volume && logicvolume == detectorConstruction->GetArgonVolume(Mode) && edep > 1 * eV && ParticleType != 0)

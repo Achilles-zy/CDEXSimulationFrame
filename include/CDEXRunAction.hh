@@ -3,7 +3,8 @@
 #ifndef CDEXRunAction_h
 #define CDEXRunAction_h
 
-#define DETNUMBER 0
+#define DETNUMBER 304
+#define STRINGNUMBER 19
 #define ACCTRUE
 #include "G4UserRunAction.hh"
 #include "globals.hh"
